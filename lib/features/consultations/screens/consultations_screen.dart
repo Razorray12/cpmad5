@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../shared/state/app_scope.dart';
 import '../models/consultation.dart';
 import '../widgets/consultation_tile.dart';
+import '../widgets/consultation_edit_form.dart';
+import '../../../shared/widgets/dialog_form_scaffold.dart';
 
 class ConsultationsScreen extends StatefulWidget {
   const ConsultationsScreen({super.key});
@@ -11,10 +13,14 @@ class ConsultationsScreen extends StatefulWidget {
 }
 
 class _ConsultationsScreenState extends State<ConsultationsScreen> {
+  int? _selectedPatientId;
+
   @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
-    final consultations = state.consultations;
+    final consultations = _selectedPatientId == null 
+        ? state.consultations 
+        : state.consultationsForPatient(_selectedPatientId!);
     final patients = state.patients;
 
     return Column(
@@ -33,13 +39,37 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
             ],
           ),
         ),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: consultations.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (_, index) => ConsultationTile(consultation: consultations[index]),
+        if (patients.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: DropdownButton<int>(
+              isExpanded: true,
+              value: _selectedPatientId,
+              hint: const Text('Все пациенты'),
+              items: [
+                const DropdownMenuItem<int>(value: null, child: Text('Все пациенты')),
+                ...patients.map((p) => DropdownMenuItem<int>(value: p.id, child: Text(p.fullName))),
+              ],
+              onChanged: (value) => setState(() => _selectedPatientId = value),
+            ),
           ),
+          const SizedBox(height: 8),
+        ],
+        Expanded(
+          child: consultations.isEmpty
+              ? const Center(
+                  child: Text('Консультации не найдены', style: TextStyle(fontSize: 16)),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: consultations.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (_, index) => ConsultationTile(
+                    consultation: consultations[index],
+                    onDelete: () => AppScope.of(context).removeConsultation(consultations[index]),
+                    onEdit: () => _showEditConsultationDialog(context, consultations[index]),
+                  ),
+                ),
         )
       ],
     );
@@ -121,6 +151,31 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
             child: const Text('Сохранить'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showEditConsultationDialog(BuildContext context, Consultation consultation) {
+    final formKey = GlobalKey<ConsultationEditFormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => DialogFormScaffold<ConsultationEditFormState>(
+        title: 'Редактировать консультацию',
+        formKey: formKey,
+        submitLabel: 'Сохранить',
+        onSubmit: () => formKey.currentState?.submit(),
+        child: ConsultationEditForm(
+          key: formKey,
+          consultation: consultation,
+          onSubmit: (updatedConsultation) {
+            AppScope.of(context).updateConsultation(updatedConsultation);
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Консультация обновлена')),
+            );
+          },
+        ),
       ),
     );
   }

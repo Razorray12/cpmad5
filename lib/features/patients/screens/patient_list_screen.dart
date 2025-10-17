@@ -4,6 +4,7 @@ import '../models/patient.dart';
 import '../widgets/patient_card.dart';
 import '../widgets/patient_form.dart';
 import '../widgets/patient_actions_sheet.dart';
+import '../widgets/patient_edit_form.dart';
 import '../../vitals/models/vital_sign.dart';
 import '../../vitals/widgets/vital_form.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -17,10 +18,19 @@ class PatientListScreen extends StatefulWidget {
 }
 
 class _PatientListScreenState extends State<PatientListScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
-    final patients = state.patients;
+    final patients = _searchQuery.isEmpty ? state.patients : state.searchPatients(_searchQuery);
 
     return Column(
       children: [
@@ -30,20 +40,41 @@ class _PatientListScreenState extends State<PatientListScreen> {
           actionLabel: 'Добавить',
           onAction: () => _showAddPatientDialog(context),
         ),
-        Expanded(
-          child: ListView.separated(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: patients.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (context, index) {
-              final p = patients[index];
-              return PatientCard(
-                patient: p,
-                onTap: () => _showPatientActions(context, p),
-                onDelete: () => AppScope.of(context).removePatient(p.id),
-              );
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: TextField(
+            controller: _searchController,
+            decoration: const InputDecoration(
+              hintText: 'Поиск по имени, диагнозу или палате...',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
             },
           ),
+        ),
+        const SizedBox(height: 8),
+        Expanded(
+          child: patients.isEmpty
+              ? const Center(
+                  child: Text('Пациенты не найдены', style: TextStyle(fontSize: 16)),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: patients.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final p = patients[index];
+                    return PatientCard(
+                      patient: p,
+                      onTap: () => _showPatientActions(context, p),
+                      onDelete: () => AppScope.of(context).removePatient(p.id),
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -110,7 +141,36 @@ class _PatientListScreenState extends State<PatientListScreen> {
           Navigator.pop(ctx);
           _showAddVitalsDialog(context, p.id);
         },
+        onEdit: () {
+          Navigator.pop(ctx);
+          _showEditPatientDialog(context, p);
+        },
         onClose: () => Navigator.pop(ctx),
+      ),
+    );
+  }
+
+  void _showEditPatientDialog(BuildContext context, Patient patient) {
+    final formKey = GlobalKey<PatientEditFormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => DialogFormScaffold<PatientEditFormState>(
+        title: 'Редактировать пациента',
+        formKey: formKey,
+        submitLabel: 'Сохранить',
+        onSubmit: () => formKey.currentState?.submit(),
+        child: PatientEditForm(
+          key: formKey,
+          patient: patient,
+          onSubmit: (updatedPatient) {
+            AppScope.of(context).updatePatient(updatedPatient);
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Данные пациента обновлены')),
+            );
+          },
+        ),
       ),
     );
   }

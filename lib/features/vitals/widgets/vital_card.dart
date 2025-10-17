@@ -7,10 +7,14 @@ import '../../../../shared/widgets/date_format.dart';
 /// Карточка жизненных показателей
 class VitalCard extends StatelessWidget {
   final VitalSign vital;
+  final int patientId;
+  final VoidCallback? onDelete;
 
   const VitalCard({
     super.key,
     required this.vital,
+    required this.patientId,
+    this.onDelete,
   });
 
   @override
@@ -33,8 +37,12 @@ class VitalCard extends StatelessWidget {
           ],
         ),
       ],
+      trailing: onDelete != null
+          ? IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,
+            )
+          : null,
     );
   }
-
-  String _formatDate(DateTime dt) => formatDateTimeDDMMYYYYHHMM(dt);
 }

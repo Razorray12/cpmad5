@@ -48,5 +48,4 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-// MessageBubble вынесен в ../widgets/message_bubble.dart
 

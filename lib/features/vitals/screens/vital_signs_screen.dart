@@ -72,7 +72,11 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
       physics: const NeverScrollableScrollPhysics(),
       itemCount: vitals.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, index) => VitalCard(vital: vitals[index]),
+      itemBuilder: (_, index) => VitalCard(
+        vital: vitals[index],
+        patientId: id,
+        onDelete: () => AppScope.of(context).removeVital(id, vitals[index]),
+      ),
     );
   }
 

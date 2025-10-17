@@ -7,7 +7,9 @@ import '../../../shared/state/app_scope.dart';
 
 class ConsultationTile extends StatelessWidget {
   final Consultation consultation;
-  const ConsultationTile({super.key, required this.consultation});
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
+  const ConsultationTile({super.key, required this.consultation, this.onDelete, this.onEdit});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,23 @@ class ConsultationTile extends StatelessWidget {
         if (consultation.doctorName != null) Text('Врач: ${consultation.doctorName}'),
         Text(consultation.note),
       ],
+      trailing: (onDelete != null || onEdit != null)
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onEdit != null)
+                  IconButton(
+                    icon: const Icon(Icons.edit, color: Colors.blue),
+                    onPressed: onEdit,
+                  ),
+                if (onDelete != null)
+                  IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red),
+                    onPressed: onDelete,
+                  ),
+              ],
+            )
+          : null,
     );
   }
 }

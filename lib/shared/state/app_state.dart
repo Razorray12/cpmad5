@@ -59,6 +59,7 @@ class AppState extends ChangeNotifier {
   void removePatient(int id) {
     _patients.removeWhere((p) => p.id == id);
     _vitalsByPatient.remove(id);
+    _consultations.removeWhere((c) => c.patientId == id);
     notifyListeners();
   }
 
@@ -71,5 +72,48 @@ class AppState extends ChangeNotifier {
   void addConsultation(Consultation c) {
     _consultations.add(c);
     notifyListeners();
+  }
+
+  void removeVital(int patientId, VitalSign vital) {
+    final list = _vitalsByPatient[patientId];
+    if (list != null) {
+      list.remove(vital);
+      notifyListeners();
+    }
+  }
+
+  void removeConsultation(Consultation consultation) {
+    _consultations.remove(consultation);
+    notifyListeners();
+  }
+
+  void updatePatient(Patient updatedPatient) {
+    final index = _patients.indexWhere((p) => p.id == updatedPatient.id);
+    if (index != -1) {
+      _patients[index] = updatedPatient;
+      notifyListeners();
+    }
+  }
+
+  void updateConsultation(Consultation updatedConsultation) {
+    final index = _consultations.indexWhere((c) => c == updatedConsultation);
+    if (index != -1) {
+      _consultations[index] = updatedConsultation;
+      notifyListeners();
+    }
+  }
+
+  List<Patient> searchPatients(String query) {
+    if (query.isEmpty) return patients;
+    final lowerQuery = query.toLowerCase();
+    return _patients.where((patient) {
+      return patient.fullName.toLowerCase().contains(lowerQuery) ||
+             patient.diagnosis.toLowerCase().contains(lowerQuery) ||
+             (patient.room?.toLowerCase().contains(lowerQuery) ?? false);
+    }).toList();
+  }
+
+  List<Consultation> consultationsForPatient(int patientId) {
+    return _consultations.where((c) => c.patientId == patientId).toList();
   }
 }
