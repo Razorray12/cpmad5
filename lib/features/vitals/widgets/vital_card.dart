@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/vital_sign.dart';
-import '../../../../shared/widgets/common_widgets.dart';
+import '../../../../shared/widgets/entity_card.dart';
+import '../../../../shared/widgets/labeled_value_chip.dart';
+import '../../../../shared/widgets/date_format.dart';
 
 /// Карточка жизненных показателей
 class VitalCard extends StatelessWidget {
@@ -13,59 +15,26 @@ class VitalCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return EntityCard(
+      title: formatDateTimeDDMMYYYYHHMM(vital.timestamp),
+      subtitleWidgets: [
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
           children: [
-            Text(
-              _formatDate(vital.timestamp),
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              children: [
-                CommonWidgets.dataChip(
-                  label: 'Температура',
-                  value: vital.temperature,
-                ),
-                CommonWidgets.dataChip(
-                  label: 'Пульс',
-                  value: vital.heartRate,
-                ),
-                CommonWidgets.dataChip(
-                  label: 'Дыхание',
-                  value: vital.respiratoryRate,
-                ),
-                CommonWidgets.dataChip(
-                  label: 'АД',
-                  value: vital.bloodPressure,
-                ),
-                CommonWidgets.dataChip(
-                  label: 'SpO₂',
-                  value: vital.oxygenSaturation,
-                ),
-                if (vital.bloodGlucose != null)
-                  CommonWidgets.dataChip(
-                    label: 'Глюкоза',
-                    value: vital.bloodGlucose!,
-                  ),
-              ],
-            ),
+            LabeledValueChip(label: 'Температура', value: vital.temperature),
+            LabeledValueChip(label: 'Пульс', value: vital.heartRate),
+            LabeledValueChip(label: 'Дыхание', value: vital.respiratoryRate),
+            LabeledValueChip(label: 'АД', value: vital.bloodPressure),
+            LabeledValueChip(label: 'SpO₂', value: vital.oxygenSaturation),
+            if (vital.bloodGlucose != null)
+              LabeledValueChip(label: 'Глюкоза', value: vital.bloodGlucose!),
           ],
         ),
-      ),
+      ],
     );
   }
 
-  String _formatDate(DateTime dt) {
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(dt.day)}.${two(dt.month)}.${dt.year} ${two(dt.hour)}:${two(dt.minute)}';
-  }
+  String _formatDate(DateTime dt) => formatDateTimeDDMMYYYYHHMM(dt);
 }

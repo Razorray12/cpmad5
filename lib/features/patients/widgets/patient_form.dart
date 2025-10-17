@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/constants/app_constants.dart';
+import '../../../../shared/widgets/form_fields.dart';
 
 /// Форма для добавления/редактирования пациента
 class PatientForm extends StatefulWidget {
@@ -93,126 +94,45 @@ class PatientFormState extends State<PatientForm> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextFormField(
-              controller: _lastNameController,
-              decoration: const InputDecoration(labelText: 'Фамилия *'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Фамилия обязательна';
-                }
-                if (value.trim().length < AppConstants.minNameLength) {
-                  return 'Фамилия должна содержать минимум ${AppConstants.minNameLength} символа';
-                }
-                return null;
-              },
-            ),
+            AppTextField(controller: _lastNameController, label: 'Фамилия', requiredField: true),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _firstNameController,
-              decoration: const InputDecoration(labelText: 'Имя *'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Имя обязательно';
-                }
-                if (value.trim().length < AppConstants.minNameLength) {
-                  return 'Имя должно содержать минимум ${AppConstants.minNameLength} символа';
-                }
-                return null;
-              },
-            ),
+            AppTextField(controller: _firstNameController, label: 'Имя', requiredField: true),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _middleNameController,
-              decoration: const InputDecoration(labelText: 'Отчество'),
-            ),
+            AppTextField(controller: _middleNameController, label: 'Отчество'),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _birthDateController,
-              decoration: const InputDecoration(labelText: 'Дата рождения'),
-            ),
+            AppTextField(controller: _birthDateController, label: 'Дата рождения'),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _phoneController,
-              decoration: const InputDecoration(labelText: 'Телефон'),
-              keyboardType: TextInputType.phone,
-            ),
+            AppTextField(controller: _phoneController, label: 'Телефон', keyboardType: TextInputType.phone),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _diagnosisController,
-              decoration: const InputDecoration(labelText: 'Диагноз *'),
-              maxLines: 2,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Диагноз обязателен';
-                }
-                return null;
-              },
-            ),
+            AppTextField(controller: _diagnosisController, label: 'Диагноз', requiredField: true, maxLines: 2),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _roomController,
-              decoration: const InputDecoration(labelText: 'Палата'),
-            ),
+            AppTextField(controller: _roomController, label: 'Палата'),
             const SizedBox(height: AppConstants.smallPadding),
-            DropdownButtonFormField<String>(
+            AppDropdown<String>(
+              label: 'Пол',
               value: _sex,
-              items: const [
-                DropdownMenuItem(
-                  value: AppConstants.patientSexMale,
-                  child: Text(AppConstants.patientSexMale),
-                ),
-                DropdownMenuItem(
-                  value: AppConstants.patientSexFemale,
-                  child: Text(AppConstants.patientSexFemale),
-                ),
-              ],
+              items: const [AppConstants.patientSexMale, AppConstants.patientSexFemale],
               onChanged: (value) => setState(() => _sex = value),
-              decoration: const InputDecoration(labelText: 'Пол'),
             ),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _admissionController,
-              decoration: const InputDecoration(labelText: 'Дата поступления'),
-            ),
+            AppTextField(controller: _admissionController, label: 'Дата поступления'),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _medicationsController,
-              decoration: const InputDecoration(labelText: 'Назначения'),
-              maxLines: 2,
-            ),
+            AppTextField(controller: _medicationsController, label: 'Назначения', maxLines: 2),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _allergiesController,
-              decoration: const InputDecoration(labelText: 'Аллергии'),
-              maxLines: 2,
-            ),
+            AppTextField(controller: _allergiesController, label: 'Аллергии', maxLines: 2),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _mainDoctorController,
-              decoration: const InputDecoration(labelText: 'Лечащий врач'),
-            ),
+            AppTextField(controller: _mainDoctorController, label: 'Лечащий врач'),
             const SizedBox(height: AppConstants.smallPadding),
-            TextFormField(
-              controller: _mainDoctorIdController,
-              decoration: const InputDecoration(labelText: 'ID врача'),
-            ),
+            AppTextField(controller: _mainDoctorIdController, label: 'ID врача'),
             const SizedBox(height: AppConstants.smallPadding),
-            DropdownButtonFormField<String>(
+            AppDropdown<String>(
+              label: 'Статус',
               value: _status,
-              decoration: const InputDecoration(labelText: 'Статус *'),
+              requiredField: true,
               items: const [
-                DropdownMenuItem(
-                  value: AppConstants.patientStatusStable,
-                  child: Text(AppConstants.patientStatusStable),
-                ),
-                DropdownMenuItem(
-                  value: AppConstants.patientStatusUnderObservation,
-                  child: Text(AppConstants.patientStatusUnderObservation),
-                ),
-                DropdownMenuItem(
-                  value: AppConstants.patientStatusCritical,
-                  child: Text(AppConstants.patientStatusCritical),
-                ),
+                AppConstants.patientStatusStable,
+                AppConstants.patientStatusUnderObservation,
+                AppConstants.patientStatusCritical,
               ],
               onChanged: (value) => setState(() => _status = value ?? _status),
             ),

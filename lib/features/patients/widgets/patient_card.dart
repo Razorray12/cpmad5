@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/patient.dart';
+import '../../../../shared/widgets/status_avatar.dart';
+import '../../../../shared/widgets/entity_card.dart';
 
 /// Карточка пациента
 class PatientCard extends StatelessWidget {
@@ -16,52 +18,28 @@ class PatientCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: _getStatusColor(patient.status),
-          child: Text(
-            patient.lastName.isNotEmpty ? patient.lastName[0] : '?',
-            style: const TextStyle(color: Colors.white),
-          ),
-        ),
-        title: Text(
-          patient.fullName,
-          style: const TextStyle(fontWeight: FontWeight.w600),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (patient.room != null && patient.room!.isNotEmpty)
-              Text('Палата: ${patient.room}'),
-            Text('Диагноз: ${patient.diagnosis}'),
-            Text(
-              'Статус: ${patient.status}',
-              style: TextStyle(color: _getStatusColor(patient.status)),
-            ),
-          ],
-        ),
-        trailing: onDelete != null
-            ? IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
-                onPressed: onDelete,
-              )
-            : null,
-        onTap: onTap,
+    return EntityCard(
+      leading: StatusAvatar(
+        initial: patient.lastName,
+        status: patient.status,
       ),
+      title: patient.fullName,
+      subtitleWidgets: [
+        if (patient.room != null && patient.room!.isNotEmpty)
+          Text('Палата: ${patient.room}'),
+        Text('Диагноз: ${patient.diagnosis}'),
+        Text(
+          'Статус: ${patient.status}',
+          style: TextStyle(color: StatusAvatar.colorForStatus(patient.status)),
+        ),
+      ],
+      trailing: onDelete != null
+          ? IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: onDelete,
+            )
+          : null,
+      onTap: onTap,
     );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'стабилен':
-        return Colors.green;
-      case 'под наблюдением':
-        return Colors.orange;
-      case 'критический':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 }

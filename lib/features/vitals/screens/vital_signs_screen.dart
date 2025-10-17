@@ -3,6 +3,10 @@ import '../../../shared/state/app_scope.dart';
 import '../models/vital_sign.dart';
 import '../widgets/vital_card.dart';
 import '../widgets/vital_form.dart';
+import '../../../shared/widgets/info_panel.dart';
+import '../../../shared/widgets/action_buttons.dart';
+import '../../../shared/widgets/empty_state.dart';
+import '../../../shared/widgets/dialog_form_scaffold.dart';
 
 class VitalSignsScreen extends StatefulWidget {
   const VitalSignsScreen({super.key});
@@ -25,13 +29,7 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(12.0),
-            ),
+          InfoPanel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -54,10 +52,10 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
           Row(
             children: [
               Expanded(
-                child: ElevatedButton.icon(
+                child: PrimaryActionButton(
                   onPressed: _selectedPatientId == null ? null : () => _showAddVitalsDialog(context, _selectedPatientId!),
-                  icon: const Icon(Icons.add),
-                  label: const Text('Добавить показатели'),
+                  icon: Icons.add,
+                  label: 'Добавить показатели',
                 ),
               ),
             ],
@@ -76,11 +74,11 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
     final state = AppScope.of(context);
     final id = _selectedPatientId;
     if (id == null) {
-      return const Text('Добавьте пациента, чтобы вести показатели.');
+      return const EmptyState(icon: Icons.info_outline, message: 'Добавьте пациента, чтобы вести показатели.');
     }
     final vitals = state.vitalsFor(id);
     if (vitals.isEmpty) {
-      return const Text('Пока нет записей.');
+      return const EmptyState(icon: Icons.history, message: 'Пока нет записей.');
     }
     return ListView.separated(
       shrinkWrap: true,
@@ -96,9 +94,12 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Показатели жизнедеятельности'),
-        content: VitalForm(
+      builder: (ctx) => DialogFormScaffold<VitalFormState>(
+        title: 'Показатели жизнедеятельности',
+        formKey: formKey,
+        submitLabel: 'Сохранить',
+        onSubmit: () => formKey.currentState?.submit(),
+        child: VitalForm(
           key: formKey,
           onSubmit: ({
             required String temperature,
@@ -124,16 +125,6 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
             );
           },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Отмена'),
-          ),
-          ElevatedButton(
-            onPressed: () => formKey.currentState?.submit(),
-            child: const Text('Сохранить'),
-          ),
-        ],
       ),
     );
   }

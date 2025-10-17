@@ -4,6 +4,8 @@ import '../models/patient.dart';
 import '../widgets/patient_card.dart';
 import '../widgets/patient_form.dart';
 import '../../vitals/models/vital_sign.dart';
+import '../../../shared/widgets/section_header.dart';
+import '../../../shared/widgets/dialog_form_scaffold.dart';
 
 class PatientListScreen extends StatefulWidget {
   const PatientListScreen({super.key});
@@ -20,22 +22,11 @@ class _PatientListScreenState extends State<PatientListScreen> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Список пациентов',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              ElevatedButton.icon(
-                onPressed: () => _showAddPatientDialog(context),
-                icon: const Icon(Icons.add),
-                label: const Text('Добавить'),
-              ),
-            ],
-          ),
+        SectionHeader(
+          title: 'Список пациентов',
+          actionIcon: Icons.add,
+          actionLabel: 'Добавить',
+          onAction: () => _showAddPatientDialog(context),
         ),
         Expanded(
           child: ListView.separated(
@@ -61,9 +52,12 @@ class _PatientListScreenState extends State<PatientListScreen> {
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Добавить пациента'),
-        content: PatientForm(
+      builder: (ctx) => DialogFormScaffold<PatientFormState>(
+        title: 'Добавить пациента',
+        formKey: formKey,
+        submitLabel: 'Добавить',
+        onSubmit: () => formKey.currentState?.submit(),
+        child: PatientForm(
           key: formKey,
           onSubmit: ({
             required String firstName,
@@ -100,16 +94,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
             Navigator.pop(ctx);
           },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Отмена'),
-          ),
-          ElevatedButton(
-            onPressed: () => formKey.currentState?.submit(),
-            child: const Text('Добавить'),
-          ),
-        ],
       ),
     );
   }
