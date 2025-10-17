@@ -3,7 +3,9 @@ import '../../../shared/state/app_scope.dart';
 import '../models/patient.dart';
 import '../widgets/patient_card.dart';
 import '../widgets/patient_form.dart';
+import '../widgets/patient_actions_sheet.dart';
 import '../../vitals/models/vital_sign.dart';
+import '../../vitals/widgets/vital_form.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/dialog_form_scaffold.dart';
 
@@ -102,100 +104,53 @@ class _PatientListScreenState extends State<PatientListScreen> {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(p.fullName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Диагноз: ${p.diagnosis}'),
-            if (p.phoneNumber != null && p.phoneNumber!.isNotEmpty)
-              Text('Телефон: ${p.phoneNumber}'),
-            Text('Статус: ${p.status}'),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.pop(ctx);
-                      _showAddVitalsDialog(context, p.id);
-                    },
-                    icon: const Icon(Icons.favorite),
-                    label: const Text('Добавить показатели'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => Navigator.pop(ctx),
-                    icon: const Icon(Icons.close),
-                    label: const Text('Закрыть'),
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
+      builder: (ctx) => PatientActionsSheet(
+        patient: p,
+        onAddVitals: () {
+          Navigator.pop(ctx);
+          _showAddVitalsDialog(context, p.id);
+        },
+        onClose: () => Navigator.pop(ctx),
       ),
     );
   }
 
   void _showAddVitalsDialog(BuildContext context, int patientId) {
-    final tCtrl = TextEditingController();
-    final hrCtrl = TextEditingController();
-    final rrCtrl = TextEditingController();
-    final bpCtrl = TextEditingController();
-    final spo2Ctrl = TextEditingController();
-    final glucoseCtrl = TextEditingController();
+    final formKey = GlobalKey<VitalFormState>();
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Показатели жизнедеятельности'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(controller: tCtrl, decoration: const InputDecoration(labelText: 'Температура (строка)')),
-              const SizedBox(height: 8),
-              TextField(controller: hrCtrl, decoration: const InputDecoration(labelText: 'Пульс (строка)')),
-              const SizedBox(height: 8),
-              TextField(controller: rrCtrl, decoration: const InputDecoration(labelText: 'Дыхание (строка)')),
-              const SizedBox(height: 8),
-              TextField(controller: bpCtrl, decoration: const InputDecoration(labelText: 'АД (строка)')),
-              const SizedBox(height: 8),
-              TextField(controller: spo2Ctrl, decoration: const InputDecoration(labelText: 'SpO₂ (строка)')),
-              const SizedBox(height: 8),
-              TextField(controller: glucoseCtrl, decoration: const InputDecoration(labelText: 'Глюкоза крови')),
-            ],
-          ),
+      builder: (ctx) => DialogFormScaffold<VitalFormState>(
+        title: 'Показатели жизнедеятельности',
+        formKey: formKey,
+        submitLabel: 'Сохранить',
+        onSubmit: () => formKey.currentState?.submit(),
+        child: VitalForm(
+          key: formKey,
+          onSubmit: ({
+            required String temperature,
+            required String heartRate,
+            required String respiratoryRate,
+            required String bloodPressure,
+            required String oxygenSaturation,
+            String? bloodGlucose,
+          }) {
+            final vital = VitalSign(
+              timestamp: DateTime.now(),
+              temperature: temperature,
+              heartRate: heartRate,
+              respiratoryRate: respiratoryRate,
+              bloodPressure: bloodPressure,
+              oxygenSaturation: oxygenSaturation,
+              bloodGlucose: bloodGlucose,
+            );
+            AppScope.of(context).addVital(patientId, vital);
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Показатели сохранены')),
+            );
+          },
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Отмена')),
-          ElevatedButton(
-            onPressed: () {
-              if (tCtrl.text.trim().isEmpty || hrCtrl.text.trim().isEmpty || rrCtrl.text.trim().isEmpty || bpCtrl.text.trim().isEmpty || spo2Ctrl.text.trim().isEmpty) return;
-              final vital = VitalSign(
-                timestamp: DateTime.now(),
-                temperature: tCtrl.text.trim(),
-                heartRate: hrCtrl.text.trim(),
-                respiratoryRate: rrCtrl.text.trim(),
-                bloodPressure: bpCtrl.text.trim(),
-                oxygenSaturation: spo2Ctrl.text.trim(),
-                bloodGlucose: glucoseCtrl.text.trim().isEmpty ? null : glucoseCtrl.text.trim(),
-              );
-              AppScope.of(context).addVital(patientId, vital);
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Показатели сохранены')),
-              );
-            },
-            child: const Text('Сохранить'),
-          ),
-        ],
       ),
     );
   }

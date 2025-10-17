@@ -131,4 +131,3 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
   }
 }
 
-// Перенесено: ConsultationTile в ../widgets/consultation_tile.dart

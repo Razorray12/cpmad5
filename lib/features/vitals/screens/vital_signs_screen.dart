@@ -3,7 +3,7 @@ import '../../../shared/state/app_scope.dart';
 import '../models/vital_sign.dart';
 import '../widgets/vital_card.dart';
 import '../widgets/vital_form.dart';
-import '../../../shared/widgets/info_panel.dart';
+import '../widgets/patient_selector_panel.dart';
 import '../../../shared/widgets/action_buttons.dart';
 import '../../../shared/widgets/empty_state.dart';
 import '../../../shared/widgets/dialog_form_scaffold.dart';
@@ -29,23 +29,10 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InfoPanel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Выберите пациента', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                DropdownButton<int>(
-                  isExpanded: true,
-                  value: _selectedPatientId,
-                  hint: const Text('Нет пациентов'),
-                  items: patients
-                      .map((p) => DropdownMenuItem<int>(value: p.id, child: Text(p.fullName)))
-                      .toList(),
-                  onChanged: (v) => setState(() => _selectedPatientId = v),
-                ),
-              ],
-            ),
+          PatientSelectorPanel(
+            patients: patients,
+            selectedPatientId: _selectedPatientId,
+            onPatientChanged: (v) => setState(() => _selectedPatientId = v),
           ),
 
           const SizedBox(height: 16),

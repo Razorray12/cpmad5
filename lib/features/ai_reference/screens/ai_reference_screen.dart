@@ -85,8 +85,6 @@ class _AiReferenceScreenState extends State<AiReferenceScreen> {
     );
   }
 
-// _info method removed - replaced with DiseaseInfoBlock widget
-
   List<DiseaseInfo> _mockData() => const [
         DiseaseInfo(
           name: 'Артериальная гипертензия',
