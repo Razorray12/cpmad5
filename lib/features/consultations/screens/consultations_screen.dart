@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../shared/state/app_scope.dart';
-import '../../patients/models/patient.dart';
 import '../models/consultation.dart';
+import '../widgets/consultation_tile.dart';
 
 class ConsultationsScreen extends StatefulWidget {
   const ConsultationsScreen({super.key});
@@ -38,7 +38,7 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: consultations.length,
             separatorBuilder: (_, __) => const SizedBox(height: 8),
-            itemBuilder: (_, index) => _ConsultationTile(c: consultations[index]),
+            itemBuilder: (_, index) => ConsultationTile(consultation: consultations[index]),
           ),
         )
       ],
@@ -131,38 +131,4 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
   }
 }
 
-class _ConsultationTile extends StatelessWidget {
-  final Consultation c;
-  const _ConsultationTile({required this.c});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = AppScope.of(context);
-    final patient = state.patients.firstWhere((p) => p.id == c.patientId, orElse: () =>
-        const Patient(
-          id: -1, 
-          firstName: 'Неизвестно', 
-          lastName: '', 
-          diagnosis: '', 
-          status: 'Неизвестно'
-        ));
-    return Card(
-      child: ListTile(
-        title: Text(patient.fullName),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(_fmtDate(c.dateTime)),
-            if (c.doctorName != null) Text('Врач: ${c.doctorName}'),
-            Text(c.note),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _fmtDate(DateTime dt) {
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(dt.day)}.${two(dt.month)}.${dt.year} ${two(dt.hour)}:${two(dt.minute)}';
-  }
-}
+// Перенесено: ConsultationTile в ../widgets/consultation_tile.dart

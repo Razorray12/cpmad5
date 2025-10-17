@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../shared/theme/app_colors.dart';
+import '../widgets/profile_header.dart';
+import '../widgets/profile_info_card.dart';
+import '../widgets/profile_stat_item.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -10,77 +12,36 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(24.0),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.bars, AppColors.blue],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16.0),
-            ),
-            child: Column(
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.white,
-                  child: const Icon(
-                    Icons.person,
-                    size: 60,
-                    color: AppColors.bars,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Др. Анна Смирнова',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const Text(
-                  'Главный врач терапевтического отделения',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
+          const ProfileHeader(),
           
           const SizedBox(height: 24),
           
-          _buildInfoCard(
-            'Образование',
-            'Московский медицинский университет им. Сеченова\nСпециальность: Терапия\nГод окончания: 2015',
-            Icons.school,
-            Colors.green,
+          const ProfileInfoCard(
+            title: 'Образование',
+            content: 'Московский медицинский университет им. Сеченова\nСпециальность: Терапия\nГод окончания: 2015',
+            icon: Icons.school,
+            color: Colors.green,
           ),
           
-          _buildInfoCard(
-            'Опыт работы',
-            '8 лет практики\nСтарший врач терапевтического отделения\nВедущий специалист по внутренним болезням',
-            Icons.work,
-            Colors.orange,
+          const ProfileInfoCard(
+            title: 'Опыт работы',
+            content: '8 лет практики\nСтарший врач терапевтического отделения\nВедущий специалист по внутренним болезням',
+            icon: Icons.work,
+            color: Colors.orange,
           ),
           
-          _buildInfoCard(
-            'Специализации',
-            '• Внутренние болезни\n• Кардиология\n• Эндокринология\n• Диабетология',
-            Icons.medical_services,
-            Colors.red,
+          const ProfileInfoCard(
+            title: 'Специализации',
+            content: '• Внутренние болезни\n• Кардиология\n• Эндокринология\n• Диабетология',
+            icon: Icons.medical_services,
+            color: Colors.red,
           ),
           
-          _buildInfoCard(
-            'Контакты',
-            'Email: a.smirnova@meditrack.ru\nТелефон: +7 (495) 123-45-67\nКабинет: 205, 2 этаж',
-            Icons.contact_phone,
-            Colors.purple,
+          const ProfileInfoCard(
+            title: 'Контакты',
+            content: 'Email: a.smirnova@meditrack.ru\nТелефон: +7 (495) 123-45-67\nКабинет: 205, 2 этаж',
+            icon: Icons.contact_phone,
+            color: Colors.purple,
           ),
           
           const SizedBox(height: 24),
@@ -106,10 +67,10 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    _buildStatItem('Пациентов', '1,247', Colors.blue),
-                    _buildStatItem('Консультаций', '3,892', Colors.green),
-                    _buildStatItem('Лет опыта', '8', Colors.orange),
+                  children: const [
+                    ProfileStatItem(label: 'Пациентов', value: '1,247', color: Colors.blue),
+                    ProfileStatItem(label: 'Консультаций', value: '3,892', color: Colors.green),
+                    ProfileStatItem(label: 'Лет опыта', value: '8', color: Colors.orange),
                   ],
                 ),
               ],
@@ -150,62 +111,4 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(String title, String content, IconData icon, Color color) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 24),
-              const SizedBox(width: 8),
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            content,
-            style: const TextStyle(fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, Color color) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: color.withOpacity(0.8),
-          ),
-        ),
-      ],
-    );
-  }
 }

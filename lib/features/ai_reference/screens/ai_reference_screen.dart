@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/disease_info.dart';
+import '../widgets/ai_header_bar.dart';
+import '../widgets/disease_info_block.dart';
+import '../widgets/symptom_result_item.dart';
 
 class AiReferenceScreen extends StatefulWidget {
   const AiReferenceScreen({super.key});
@@ -18,56 +21,12 @@ class _AiReferenceScreenState extends State<AiReferenceScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.blue.shade50,
-            border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-          ),
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  const Icon(Icons.medical_information, color: Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(
-                    _bySymptoms ? 'Поиск по симптомам' : 'Справочник заболеваний',
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => setState(() => _bySymptoms = !_bySymptoms),
-                    icon: Icon(_bySymptoms ? Icons.medical_services : Icons.sick),
-                    tooltip: _bySymptoms ? 'К поиску заболеваний' : 'К поиску по симптомам',
-                  )
-                ],
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _query,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  hintText: _bySymptoms ? 'Напр.: кашель, жар' : 'Напр.: гипертензия',
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    onPressed: () => setState(() { _query.clear(); _disease = null; _symptomMatches = []; }),
-                    icon: const Icon(Icons.clear),
-                  ),
-                ),
-                onSubmitted: (_) => _search(),
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton.icon(
-                  onPressed: _search,
-                  icon: const Icon(Icons.search),
-                  label: const Text('Искать'),
-                ),
-              )
-            ],
-          ),
+        AiHeaderBar(
+          bySymptoms: _bySymptoms,
+          queryController: _query,
+          onToggleMode: () => setState(() => _bySymptoms = !_bySymptoms),
+          onSearch: _search,
+          onClear: () => setState(() { _query.clear(); _disease = null; _symptomMatches = []; }),
         ),
         Expanded(child: _bySymptoms ? _buildSymptoms() : _buildDisease())
       ],
@@ -104,9 +63,9 @@ class _AiReferenceScreenState extends State<AiReferenceScreen> {
         children: [
           Text(_disease!.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          _info('Описание', _disease!.description, Icons.description, Colors.green),
-          _info('Симптомы', _disease!.symptoms.join(', '), Icons.warning, Colors.orange),
-          _info('Препараты', _disease!.drugs.join(', '), Icons.medication, Colors.purple),
+          DiseaseInfoBlock(title: 'Описание', content: _disease!.description, icon: Icons.description, color: Colors.green),
+          DiseaseInfoBlock(title: 'Симптомы', content: _disease!.symptoms.join(', '), icon: Icons.warning, color: Colors.orange),
+          DiseaseInfoBlock(title: 'Препараты', content: _disease!.drugs.join(', '), icon: Icons.medication, color: Colors.purple),
         ],
       ),
     );
@@ -122,46 +81,11 @@ class _AiReferenceScreenState extends State<AiReferenceScreen> {
       padding: const EdgeInsets.all(16),
       itemCount: _symptomMatches.length,
       separatorBuilder: (_, __) => const SizedBox(height: 8),
-      itemBuilder: (_, i) {
-        final d = _symptomMatches[i];
-        return Card(
-          child: ListTile(
-            title: Text(d.name),
-            subtitle: Text(d.description, maxLines: 2, overflow: TextOverflow.ellipsis),
-          ),
-        );
-      },
+      itemBuilder: (_, i) => SymptomResultItem(disease: _symptomMatches[i]),
     );
   }
 
-  Widget _info(String title, String content, IconData icon, Color color) {
-    return Container(
-      margin: const EdgeInsets.only(top: 8),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: TextStyle(color: color, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-                Text(content),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
+// _info method removed - replaced with DiseaseInfoBlock widget
 
   List<DiseaseInfo> _mockData() => const [
         DiseaseInfo(

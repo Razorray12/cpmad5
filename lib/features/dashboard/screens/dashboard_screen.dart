@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../shared/state/app_scope.dart';
-import '../../../shared/theme/app_colors.dart';
+import '../widgets/dashboard_header.dart';
+import '../widgets/dashboard_stat_card.dart';
+import '../widgets/status_stats_item.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -22,47 +24,15 @@ class DashboardScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20.0),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.bars, AppColors.blue],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-            child: const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Панель управления MediTrack',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  'Сводка по пациентам и активности',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white70,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          const DashboardHeader(),
 
           const SizedBox(height: 20),
 
           Row(
             children: [
-              Expanded(child: _buildStatCard('Пациентов', '$totalPatients', Icons.people, Colors.green)),
+              Expanded(child: DashboardStatCard(title: 'Пациентов', value: '$totalPatients', icon: Icons.people, color: Colors.green)),
               const SizedBox(width: 12),
-              Expanded(child: _buildStatCard('Показателей', '$vitalsCount', Icons.favorite, Colors.red)),
+              Expanded(child: DashboardStatCard(title: 'Показателей', value: '$vitalsCount', icon: Icons.favorite, color: Colors.red)),
             ],
           ),
 
@@ -70,9 +40,9 @@ class DashboardScreen extends StatelessWidget {
 
           Row(
             children: [
-              Expanded(child: _buildStatCard('Консультаций', '$consultations', Icons.event_note, Colors.orange)),
+              Expanded(child: DashboardStatCard(title: 'Консультаций', value: '$consultations', icon: Icons.event_note, color: Colors.orange)),
               const SizedBox(width: 12),
-              Expanded(child: _buildStatCard('Стабилен', '$stable', Icons.check_circle, Colors.blueGrey)),
+              Expanded(child: DashboardStatCard(title: 'Стабилен', value: '$stable', icon: Icons.check_circle, color: Colors.blueGrey)),
             ],
           ),
 
@@ -98,69 +68,9 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                _buildUpdateItem('Под наблюдением', '$watch', Icons.visibility),
-                _buildUpdateItem('Критический', '$critical', Icons.warning_amber),
-                _buildUpdateItem('Стабилен', '$stable', Icons.check_circle),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 32, color: color),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: color.withOpacity(0.8),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUpdateItem(String title, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.blue),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
+                StatusStatsItem(title: 'Под наблюдением', value: '$watch', icon: Icons.visibility),
+                StatusStatsItem(title: 'Критический', value: '$critical', icon: Icons.warning_amber),
+                StatusStatsItem(title: 'Стабилен', value: '$stable', icon: Icons.check_circle),
               ],
             ),
           ),
