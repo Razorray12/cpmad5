@@ -18,12 +18,13 @@ class PatientActionsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Row(
             children: [
               StatusAvatar(
@@ -43,7 +44,7 @@ class PatientActionsSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           _buildInfoRow('Диагноз', patient.diagnosis),
           if (patient.room != null && patient.room!.isNotEmpty)
             _buildInfoRow('Палата', patient.room!),
@@ -91,21 +92,22 @@ class PatientActionsSheet extends StatelessWidget {
             ),
           ),
         ],
+        ),
       ),
     );
   }
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 4.0),
+      padding: const EdgeInsets.only(bottom: 2.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
             width: 120,
-            child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.w500)),
+            child: Text('$label:', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14)),
           ),
-          Expanded(child: Text(value)),
+          Expanded(child: Text(value, style: const TextStyle(fontSize: 14))),
         ],
       ),
     );
