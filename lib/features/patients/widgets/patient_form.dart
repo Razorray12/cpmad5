@@ -19,6 +19,7 @@ class PatientForm extends StatefulWidget {
     String? mainDoctor,
     String? mainDoctorID,
     required String status,
+    String? imageUrl,
   }) onSubmit;
 
   const PatientForm({
@@ -44,6 +45,7 @@ class PatientFormState extends State<PatientForm> {
   final _allergiesController = TextEditingController();
   final _mainDoctorController = TextEditingController();
   final _mainDoctorIdController = TextEditingController();
+  final _imageUrlController = TextEditingController();
 
   String _status = AppConstants.patientStatusStable;
   String? _sex;
@@ -62,6 +64,7 @@ class PatientFormState extends State<PatientForm> {
     _allergiesController.dispose();
     _mainDoctorController.dispose();
     _mainDoctorIdController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -82,6 +85,7 @@ class PatientFormState extends State<PatientForm> {
         mainDoctor: _mainDoctorController.text.trim().isEmpty ? null : _mainDoctorController.text.trim(),
         mainDoctorID: _mainDoctorIdController.text.trim().isEmpty ? null : _mainDoctorIdController.text.trim(),
         status: _status,
+        imageUrl: _imageUrlController.text.trim().isEmpty ? null : _imageUrlController.text.trim(),
       );
     }
   }
@@ -124,6 +128,8 @@ class PatientFormState extends State<PatientForm> {
             AppTextField(controller: _mainDoctorController, label: 'Лечащий врач'),
             const SizedBox(height: AppConstants.smallPadding),
             AppTextField(controller: _mainDoctorIdController, label: 'ID врача'),
+            const SizedBox(height: AppConstants.smallPadding),
+            AppTextField(controller: _imageUrlController, label: 'URL изображения'),
             const SizedBox(height: AppConstants.smallPadding),
             AppDropdown<String>(
               label: 'Статус',

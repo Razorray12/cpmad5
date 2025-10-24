@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import '../../../shared/theme/app_colors.dart';
 
@@ -22,11 +23,7 @@ class ProfileHeader extends StatelessWidget {
           CircleAvatar(
             radius: 50,
             backgroundColor: Colors.white,
-            child: const Icon(
-              Icons.person,
-              size: 60,
-              color: AppColors.bars,
-            ),
+            backgroundImage: CachedNetworkImageProvider('https://img.freepik.com/free-photo/beautiful-young-female-doctor-looking-camera-office_1301-7807.jpg?semt=ais_hybrid&w=740&q=80'),
           ),
           const SizedBox(height: 16),
           const Text(

@@ -41,6 +41,26 @@ class _PatientListScreenState extends State<PatientListScreen> {
           onAction: () => _showAddPatientDialog(context),
         ),
         Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    AppScope.of(context).clearAllData();
+                    AppScope.of(context).initializeSampleData();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Данные перезагружены')),
+                    );
+                  },
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Перезагрузить данные'),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: TextField(
             controller: _searchController,
@@ -107,6 +127,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
             String? mainDoctor,
             String? mainDoctorID,
             required String status,
+            String? imageUrl,
           }) {
             AppScope.of(context).addPatient(
               firstName: firstName,
@@ -123,6 +144,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
               mainDoctor: mainDoctor,
               mainDoctorID: mainDoctorID,
               status: status,
+              imageUrl: imageUrl,
             );
             Navigator.pop(ctx);
           },

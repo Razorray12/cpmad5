@@ -6,6 +6,7 @@ import 'features/consultations/screens/consultations_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
 import 'features/ai_reference/screens/ai_reference_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
+import 'shared/state/app_scope.dart';
 
 class RootShell extends StatefulWidget {
   const RootShell({super.key});
@@ -16,6 +17,19 @@ class RootShell extends StatefulWidget {
 
 class _RootShellState extends State<RootShell> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Инициализируем тестовые данные при запуске приложения
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        AppScope.of(context).initializeSampleData();
+      } catch (e) {
+        print('Ошибка инициализации тестовых данных: $e');
+      }
+    });
+  }
 
   final List<Widget> _screens = const [
     DashboardScreen(),

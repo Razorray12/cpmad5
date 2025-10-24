@@ -14,6 +14,7 @@ class Patient {
   final String? mainDoctor;
   final String? mainDoctorID;
   final String status; // Стабилен/Под наблюдением/Критический
+  final String? imageUrl; // URL изображения пациента
 
   const Patient({
     required this.id,
@@ -31,6 +32,7 @@ class Patient {
     this.mainDoctor,
     this.mainDoctorID,
     required this.status,
+    this.imageUrl,
   });
 
   String get fullName => [lastName, firstName, if (middleName != null && middleName!.isNotEmpty) middleName]

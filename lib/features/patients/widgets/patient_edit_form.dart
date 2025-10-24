@@ -32,6 +32,7 @@ class PatientEditFormState extends State<PatientEditForm> {
   final _allergiesController = TextEditingController();
   final _mainDoctorController = TextEditingController();
   final _mainDoctorIdController = TextEditingController();
+  final _imageUrlController = TextEditingController();
 
   String _status = '';
   String? _sex;
@@ -56,6 +57,7 @@ class PatientEditFormState extends State<PatientEditForm> {
     _allergiesController.text = p.allergies ?? '';
     _mainDoctorController.text = p.mainDoctor ?? '';
     _mainDoctorIdController.text = p.mainDoctorID ?? '';
+    _imageUrlController.text = p.imageUrl ?? '';
     _status = p.status;
     _sex = p.sex;
   }
@@ -74,6 +76,7 @@ class PatientEditFormState extends State<PatientEditForm> {
     _allergiesController.dispose();
     _mainDoctorController.dispose();
     _mainDoctorIdController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -95,6 +98,7 @@ class PatientEditFormState extends State<PatientEditForm> {
         mainDoctor: _mainDoctorController.text.trim().isEmpty ? null : _mainDoctorController.text.trim(),
         mainDoctorID: _mainDoctorIdController.text.trim().isEmpty ? null : _mainDoctorIdController.text.trim(),
         status: _status,
+        imageUrl: _imageUrlController.text.trim().isEmpty ? null : _imageUrlController.text.trim(),
       );
       widget.onSubmit(updatedPatient);
     }
@@ -138,6 +142,8 @@ class PatientEditFormState extends State<PatientEditForm> {
             AppTextField(controller: _mainDoctorController, label: 'Лечащий врач'),
             const SizedBox(height: AppConstants.smallPadding),
             AppTextField(controller: _mainDoctorIdController, label: 'ID врача'),
+            const SizedBox(height: AppConstants.smallPadding),
+            AppTextField(controller: _imageUrlController, label: 'URL изображения'),
             const SizedBox(height: AppConstants.smallPadding),
             AppDropdown<String>(
               label: 'Статус',
