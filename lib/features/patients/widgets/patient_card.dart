@@ -42,36 +42,37 @@ class PatientCard extends StatelessWidget {
   }
 
   Widget _buildPatientAvatar() {
-    final url = patient.imageUrl;
-    final borderColor = StatusAvatar.colorForStatus(patient.status);
-
-    if (url != null && url.isNotEmpty) {
+    if (patient.imageUrl != null && patient.imageUrl!.isNotEmpty) {
       return Container(
         width: 50,
         height: 50,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: borderColor, width: 2),
+          border: Border.all(
+            color: StatusAvatar.colorForStatus(patient.status),
+            width: 2,
+          ),
         ),
         child: ClipOval(
           child: CachedNetworkImage(
-            imageUrl: url,
+            imageUrl: patient.imageUrl!,
             fit: BoxFit.cover,
-            errorWidget: (context, u, error) {
-              debugPrint('Ошибка загрузки изображения: $u, ошибка: $error');
-              return StatusAvatar(
-                initial: patient.lastName,
-                status: patient.status,
-              );
-            },
-            placeholder: (context, u) => Container(
+            placeholder: (context, url) => Container(
               color: Colors.grey[300],
-              child: const Icon(Icons.person),
+              child: const Icon(Icons.person, color: Colors.grey),
+            ),
+            errorWidget: (context, url, error) => Container(
+              color: Colors.grey[300],
+              child: const Icon(Icons.person, color: Colors.grey),
             ),
           ),
         ),
       );
+    } else {
+      return StatusAvatar(
+        initial: patient.lastName,
+        status: patient.status,
+      );
     }
-    return StatusAvatar(initial: patient.lastName, status: patient.status);
   }
 }
