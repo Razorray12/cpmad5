@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../shared/state/app_scope.dart';
 import '../models/patient.dart';
 import '../widgets/patient_card.dart';
@@ -9,6 +10,7 @@ import '../../vitals/models/vital_sign.dart';
 import '../../vitals/widgets/vital_form.dart';
 import '../../../shared/widgets/section_header.dart';
 import '../../../shared/widgets/dialog_form_scaffold.dart';
+import '../../../shared/navigation/app_router.dart';
 
 class PatientListScreen extends StatefulWidget {
   const PatientListScreen({super.key});
@@ -90,7 +92,13 @@ class _PatientListScreenState extends State<PatientListScreen> {
                     final p = patients[index];
                     return PatientCard(
                       patient: p,
-                      onTap: () => _showPatientActions(context, p),
+                      onTap: () {
+                        // Пример вертикальной навигации через GoRouter: context.push
+                        context.push(
+                          AppRouter.patientDetail.replaceAll(':patientId', p.id.toString()),
+                          extra: p, // Передаем пациента через extra
+                        );
+                      },
                       onDelete: () => AppScope.of(context).removePatient(p.id),
                     );
                   },

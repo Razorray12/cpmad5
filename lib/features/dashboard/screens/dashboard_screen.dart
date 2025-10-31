@@ -4,9 +4,14 @@ import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_stat_card.dart';
 import '../widgets/status_stats_item.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final app = AppScope.of(context);

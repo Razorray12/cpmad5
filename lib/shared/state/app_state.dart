@@ -8,6 +8,7 @@ class AppState extends ChangeNotifier {
   final List<Patient> _patients = [];
   final Map<int, List<VitalSign>> _vitalsByPatient = {};
   final List<Consultation> _consultations = [];
+  bool _isInitialized = false; // Флаг инициализации для предотвращения дублирования
 
   List<Patient> get patients => List.unmodifiable(_patients);
 
@@ -120,6 +121,12 @@ class AppState extends ChangeNotifier {
   }
 
   void initializeSampleData() {
+    // Проверяем, были ли данные уже инициализированы
+    if (_isInitialized) {
+      print('Данные уже инициализированы, пропускаем повторную инициализацию');
+      return;
+    }
+
     try {
       // Добавляем тестовых пациентов с сетевыми изображениями
     addPatient(
@@ -211,6 +218,7 @@ class AppState extends ChangeNotifier {
       status: 'Под наблюдением',
       imageUrl: 'https://randomuser.me/api/portraits/women/77.jpg',
     );
+    _isInitialized = true; // Помечаем как инициализированное
     print('Тестовые данные успешно инициализированы');
     } catch (e) {
       print('Ошибка при инициализации тестовых данных: $e');
@@ -222,6 +230,7 @@ class AppState extends ChangeNotifier {
     _vitalsByPatient.clear();
     _consultations.clear();
     _nextId = 1;
+    _isInitialized = false; // Сбрасываем флаг при очистке данных
     notifyListeners();
     print('Все данные очищены');
   }
