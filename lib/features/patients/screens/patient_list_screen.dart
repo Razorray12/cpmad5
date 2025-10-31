@@ -5,6 +5,7 @@ import '../widgets/patient_card.dart';
 import '../widgets/patient_form.dart';
 import '../widgets/patient_actions_sheet.dart';
 import '../widgets/patient_edit_form.dart';
+import '../screens/patient_detail_screen.dart';
 import '../../vitals/models/vital_sign.dart';
 import '../../vitals/widgets/vital_form.dart';
 import '../../../shared/widgets/section_header.dart';
@@ -90,7 +91,15 @@ class _PatientListScreenState extends State<PatientListScreen> {
                     final p = patients[index];
                     return PatientCard(
                       patient: p,
-                      onTap: () => _showPatientActions(context, p),
+                      onTap: () {
+                        // Пример вертикальной навигации: Navigator.push
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PatientDetailScreen(patient: p),
+                          ),
+                        );
+                      },
                       onDelete: () => AppScope.of(context).removePatient(p.id),
                     );
                   },
