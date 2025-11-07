@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class VerticalStepPage extends StatelessWidget {
   final String title;
@@ -48,7 +49,7 @@ class VerticalStepPage extends StatelessWidget {
                       ? onNext
                       : (nextRoute == null
                           ? null
-                          : () => Navigator.pushNamed(context, nextRoute!)),
+                          : () => context.push(nextRoute!)),
                   child: Text(nextLabel),
                 ),
               ),

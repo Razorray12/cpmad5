@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../navigation/app_routes.dart';
+import 'package:go_router/go_router.dart';
 
 class AppShellPage extends StatelessWidget {
   final int currentIndex;
@@ -39,22 +40,22 @@ class AppShellPage extends StatelessWidget {
     if (index == currentIndex) return;
     switch (index) {
       case 0:
-        Navigator.pushReplacementNamed(context, AppRoutes.dashboard);
+        context.go(AppRoutes.dashboard);
         break;
       case 1:
-        Navigator.pushReplacementNamed(context, AppRoutes.patients);
+        context.go(AppRoutes.patients);
         break;
       case 2:
-        Navigator.pushReplacementNamed(context, AppRoutes.vitals);
+        context.go(AppRoutes.vitals);
         break;
       case 3:
-        Navigator.pushReplacementNamed(context, AppRoutes.consultations);
+        context.go(AppRoutes.consultations);
         break;
       case 4:
-        Navigator.pushReplacementNamed(context, AppRoutes.chat);
+        context.go(AppRoutes.chat);
         break;
       case 5:
-        Navigator.pushReplacementNamed(context, AppRoutes.profile);
+        context.go(AppRoutes.profile);
         break;
     }
   }

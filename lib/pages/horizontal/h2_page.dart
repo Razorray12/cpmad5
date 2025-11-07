@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../shared/navigation/app_routes.dart';
 import '../../shared/widgets/horizontal_step_page.dart';
 import '../../shared/state/app_scope.dart';
@@ -67,7 +68,7 @@ class _H2PageState extends State<H2Page> {
       nextLabel: 'К первичным показателям',
       onNext: () {
         _formKey.currentState?.submit();
-        Navigator.pushReplacementNamed(context, AppRoutes.h3);
+        context.go(AppRoutes.h3);
       },
     );
   }

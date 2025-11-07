@@ -5,6 +5,7 @@ import '../../shared/state/app_scope.dart';
 import '../../features/patients/widgets/patient_card.dart';
 import '../../features/vitals/widgets/vital_card.dart';
 import '../../features/consultations/models/consultation.dart';
+import 'package:go_router/go_router.dart';
 
 class H5Page extends StatelessWidget {
   const H5Page({super.key});
@@ -63,7 +64,7 @@ class H5Page extends StatelessWidget {
       nextLabel: 'Завершить и перейти на панель',
       onNext: () {
         app.clearAdmission();
-        Navigator.pushReplacementNamed(context, AppRoutes.v1);
+        context.go(AppRoutes.v1);
       },
     );
   }

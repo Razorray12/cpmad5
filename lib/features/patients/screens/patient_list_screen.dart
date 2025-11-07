@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../shared/state/app_scope.dart';
 import '../models/patient.dart';
 import '../widgets/patient_card.dart';
@@ -89,13 +90,7 @@ class _PatientListScreenState extends State<PatientListScreen> {
                     return PatientCard(
                       patient: p,
                       onTap: () {
-                        // Пример вертикальной навигации: Navigator.push
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PatientDetailScreen(patient: p),
-                          ),
-                        );
+                        context.push('/patient/${p.id}', extra: p);
                       },
                       onDelete: () => AppScope.of(context).removePatient(p.id),
                     );

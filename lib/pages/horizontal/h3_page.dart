@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../shared/navigation/app_routes.dart';
 import '../../shared/widgets/horizontal_step_page.dart';
 import '../../shared/state/app_scope.dart';
@@ -52,7 +53,7 @@ class _H3PageState extends State<H3Page> {
       nextLabel: 'К первичной консультации',
       onNext: () {
         _formKey.currentState?.submit();
-        Navigator.pushReplacementNamed(context, AppRoutes.h4);
+        context.go(AppRoutes.h4);
       },
     );
   }

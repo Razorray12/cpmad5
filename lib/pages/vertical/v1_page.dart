@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../shared/navigation/app_routes.dart';
+import 'package:go_router/go_router.dart';
 import '../../shared/widgets/vertical_step_page.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../shared/state/app_scope.dart';
@@ -34,7 +35,7 @@ class _V1PageState extends State<V1Page> {
       nextRoute: AppRoutes.v2,
       nextLabel: 'К пациентам',
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.pushNamed(context, AppRoutes.h1),
+        onPressed: () => context.push(AppRoutes.h1),
         icon: const Icon(Icons.playlist_add),
         label: const Text('Новая госпитализация'),
       ),

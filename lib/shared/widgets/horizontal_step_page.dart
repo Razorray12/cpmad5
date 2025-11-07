@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HorizontalStepPage extends StatelessWidget {
   final String title;
@@ -39,7 +40,7 @@ class HorizontalStepPage extends StatelessWidget {
                       ? onNext
                       : (nextRoute == null
                           ? null
-                          : () => Navigator.pushReplacementNamed(context, nextRoute!)),
+                          : () => context.go(nextRoute!)),
                   child: Text(nextLabel),
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../shared/navigation/app_routes.dart';
 import '../../shared/widgets/horizontal_step_page.dart';
 import '../../shared/state/app_scope.dart';
@@ -70,7 +71,7 @@ class _H4PageState extends State<H4Page> {
       nextLabel: 'К итогу госпитализации',
       onNext: () {
         _formKey.currentState?.submit();
-        Navigator.pushReplacementNamed(context, AppRoutes.h5);
+        context.go(AppRoutes.h5);
       },
     );
   }
