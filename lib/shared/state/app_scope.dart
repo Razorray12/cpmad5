@@ -10,4 +10,9 @@ class AppScope extends InheritedNotifier<AppState> {
     assert(scope != null, 'AppScope not found in context');
     return scope!.notifier!;
   }
+
+  @override
+  bool updateShouldNotify(covariant InheritedNotifier<AppState> oldWidget) {
+    return oldWidget.notifier != notifier;
+  }
 }

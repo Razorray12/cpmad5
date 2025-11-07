@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../shared/widgets/vertical_step_page.dart';
 import '../../features/dashboard/screens/dashboard_screen.dart';
 import '../../shared/state/app_scope.dart';
+import '../../shared/di/locator.dart';
+import '../../shared/state/app_state.dart';
 
 class V1Page extends StatefulWidget {
   const V1Page({super.key});
@@ -19,7 +21,7 @@ class _V1PageState extends State<V1Page> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_initialized) {
-      final app = AppScope.of(context);
+      final app = getIt<AppState>();
       if (app.patients.isEmpty) {
         app.initializeSampleData();
       }
