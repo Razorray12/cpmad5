@@ -8,6 +8,8 @@ class AppState extends ChangeNotifier {
   final List<Patient> _patients = [];
   final Map<int, List<VitalSign>> _vitalsByPatient = {};
   final List<Consultation> _consultations = [];
+  int? _lastAddedPatientId;
+  int? _admissionPatientId;
 
   List<Patient> get patients => List.unmodifiable(_patients);
 
@@ -16,6 +18,26 @@ class AppState extends ChangeNotifier {
 
   List<Consultation> get consultations => List.unmodifiable(_consultations);
   int get consultationsCount => _consultations.length;
+  int? get lastAddedPatientId => _lastAddedPatientId;
+  Patient? get lastAddedPatient => _patients.cast<Patient?>().firstWhere(
+    (p) => p?.id == _lastAddedPatientId,
+    orElse: () => null,
+  );
+
+  // Admission (horizontal wizard) context
+  int? get admissionPatientId => _admissionPatientId;
+  Patient? get admissionPatient => _patients.cast<Patient?>().firstWhere(
+    (p) => p?.id == _admissionPatientId,
+    orElse: () => null,
+  );
+  void setAdmissionPatientId(int id) {
+    _admissionPatientId = id;
+    notifyListeners();
+  }
+  void clearAdmission() {
+    _admissionPatientId = null;
+    notifyListeners();
+  }
 
   Patient addPatient({
     required String firstName,
@@ -54,6 +76,7 @@ class AppState extends ChangeNotifier {
     );
     _patients.add(patient);
     _vitalsByPatient[patient.id] = [];
+    _lastAddedPatientId = patient.id;
     notifyListeners();
     return patient;
   }

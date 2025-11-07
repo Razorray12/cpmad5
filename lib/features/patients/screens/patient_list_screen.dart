@@ -35,11 +35,8 @@ class _PatientListScreenState extends State<PatientListScreen> {
 
     return Column(
       children: [
-        SectionHeader(
+        const SectionHeader(
           title: 'Список пациентов',
-          actionIcon: Icons.add,
-          actionLabel: 'Добавить',
-          onAction: () => _showAddPatientDialog(context),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),

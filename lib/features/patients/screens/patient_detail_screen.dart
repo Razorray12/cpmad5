@@ -5,6 +5,7 @@ import '../widgets/patient_card.dart';
 import '../../vitals/models/vital_sign.dart';
 import '../../vitals/widgets/vital_card.dart';
 import '../../../shared/widgets/status_avatar.dart';
+import '../../../shared/navigation/app_routes.dart';
 
 /// Страница деталей пациента - пример вертикальной навигации (Navigator.push)
 class PatientDetailScreen extends StatelessWidget {
@@ -32,6 +33,28 @@ class PatientDetailScreen extends StatelessWidget {
             PatientCard(
               patient: patient,
               onTap: null,
+            ),
+            const SizedBox(height: 24),
+
+            // Быстрые действия
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pushNamed(context, AppRoutes.v4),
+                    icon: const Icon(Icons.favorite),
+                    label: const Text('К показателям'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pushNamed(context, AppRoutes.v5),
+                    icon: const Icon(Icons.chat),
+                    label: const Text('К чату'),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
 
