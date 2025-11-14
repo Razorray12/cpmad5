@@ -28,6 +28,8 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  mobx: ^2.5.0
+  flutter_mobx: ^2.3.0
   flutter:
     sdk: flutter
 
@@ -37,10 +39,19 @@ dependencies:
   cached_network_image: ^3.3.1
   go_router: ^14.0.0
   get_it: ^7.7.0
+  flutter_bloc: ^8.1.0
+  bloc: ^8.1.0
+  riverpod:  ^3.0.3
+  riverpod_annotation: ^3.0.3
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  riverpod_generator: ^3.0.3
+  mobx_codegen: ^2.6.0
+  build_runner: ^2.7.1
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

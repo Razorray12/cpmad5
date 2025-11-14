@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import '../../../shared/state/app_scope.dart';
 import '../models/consultation.dart';
 import '../widgets/consultation_tile.dart';
@@ -17,61 +18,90 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = AppScope.of(context);
-    final consultations = _selectedPatientId == null 
-        ? state.consultations 
-        : state.consultationsForPatient(_selectedPatientId!);
-    final patients = state.patients;
+    return Observer(
+      builder: (context) {
+        final state = AppScope.of(context);
+        final consultations = _selectedPatientId == null
+            ? state.consultationsReadOnly
+            : state.consultationsForPatient(_selectedPatientId!);
+        final patients = state.patients;
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Консультации', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              ElevatedButton.icon(
-                onPressed: patients.isEmpty ? null : () => _showAddConsultationDialog(context),
-                icon: const Icon(Icons.add),
-                label: const Text('Добавить'),
-              )
-            ],
-          ),
-        ),
-        if (patients.isNotEmpty) ...[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: DropdownButton<int>(
-              isExpanded: true,
-              value: _selectedPatientId,
-              hint: const Text('Все пациенты'),
-              items: [
-                const DropdownMenuItem<int>(value: null, child: Text('Все пациенты')),
-                ...patients.map((p) => DropdownMenuItem<int>(value: p.id, child: Text(p.fullName))),
-              ],
-              onChanged: (value) => setState(() => _selectedPatientId = value),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-        Expanded(
-          child: consultations.isEmpty
-              ? const Center(
-                  child: Text('Консультации не найдены', style: TextStyle(fontSize: 16)),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: consultations.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (_, index) => ConsultationTile(
-                    consultation: consultations[index],
-                    onDelete: () => AppScope.of(context).removeConsultation(consultations[index]),
-                    onEdit: () => _showEditConsultationDialog(context, consultations[index]),
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Консультации',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  ElevatedButton.icon(
+                    onPressed: patients.isEmpty
+                        ? null
+                        : () => _showAddConsultationDialog(context),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Добавить'),
+                  )
+                ],
+              ),
+            ),
+            if (patients.isNotEmpty) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: DropdownButton<int>(
+                  isExpanded: true,
+                  value: _selectedPatientId,
+                  hint: const Text('Все пациенты'),
+                  items: [
+                    const DropdownMenuItem<int>(
+                      value: null,
+                      child: Text('Все пациенты'),
+                    ),
+                    ...patients.map(
+                      (p) => DropdownMenuItem<int>(
+                        value: p.id,
+                        child: Text(p.fullName),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) =>
+                      setState(() => _selectedPatientId = value),
                 ),
-        )
-      ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            Expanded(
+              child: consultations.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'Консультации не найдены',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: consultations.length,
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (_, index) => ConsultationTile(
+                        consultation: consultations[index],
+                        onDelete: () => AppScope.of(context)
+                            .removeConsultation(consultations[index]),
+                        onEdit: () => _showEditConsultationDialog(
+                          context,
+                          consultations[index],
+                        ),
+                      ),
+                    ),
+            )
+          ],
+        );
+      },
     );
   }
 

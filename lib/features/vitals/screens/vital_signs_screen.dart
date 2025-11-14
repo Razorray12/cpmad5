@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import '../../../shared/state/app_scope.dart';
+import '../../../shared/state/app_state.dart';
 import '../models/vital_sign.dart';
 import '../widgets/vital_card.dart';
 import '../widgets/vital_form.dart';
@@ -20,45 +22,59 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = AppScope.of(context);
-    final patients = state.patients;
-    _selectedPatientId ??= patients.isNotEmpty ? patients.first.id : null;
+    return Observer(
+      builder: (context) {
+        final state = AppScope.of(context);
+        final patients = state.patients;
+        _selectedPatientId ??=
+            patients.isNotEmpty ? patients.first.id : null;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          PatientSelectorPanel(
-            patients: patients,
-            selectedPatientId: _selectedPatientId,
-            onPatientChanged: (v) => setState(() => _selectedPatientId = v),
-          ),
-
-          const SizedBox(height: 16),
-          Row(
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: PrimaryActionButton(
-                  onPressed: _selectedPatientId == null ? null : () => _showAddVitalsDialog(context, _selectedPatientId!),
-                  icon: Icons.add,
-                  label: 'Добавить показатели',
+              PatientSelectorPanel(
+                patients: patients,
+                selectedPatientId: _selectedPatientId,
+                onPatientChanged: (v) =>
+                    setState(() => _selectedPatientId = v),
+              ),
+
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: PrimaryActionButton(
+                      onPressed: _selectedPatientId == null
+                          ? null
+                          : () => _showAddVitalsDialog(
+                              context, _selectedPatientId!),
+                      icon: Icons.add,
+                      label: 'Добавить показатели',
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+              const Text(
+                'История показателей',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
+              const SizedBox(height: 8),
+              _buildVitalsList(context, state),
             ],
           ),
-
-          const SizedBox(height: 16),
-          const Text('История показателей', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          _buildVitalsList(context),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildVitalsList(BuildContext context) {
-    final state = AppScope.of(context);
+  Widget _buildVitalsList(BuildContext context, AppState state) {
     final id = _selectedPatientId;
     if (id == null) {
       return const EmptyState(icon: Icons.info_outline, message: 'Добавьте пациента, чтобы вести показатели.');

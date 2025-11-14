@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import '../state/chat_state.dart';
 import '../widgets/chat_input_bar.dart';
 import '../widgets/message_bubble.dart';
@@ -20,14 +21,15 @@ class _ChatScreenState extends State<ChatScreen> {
     return Column(
       children: [
         Expanded(
-          child: AnimatedBuilder(
-            animation: _state,
-            builder: (_, __) => ListView.builder(
-              controller: _scroll,
-              padding: const EdgeInsets.all(12),
-              itemCount: _state.messages.length,
-              itemBuilder: (_, i) => MessageBubble(msg: _state.messages[i]),
-            ),
+          child: Observer(
+            builder: (_) {
+              return ListView.builder(
+                controller: _scroll,
+                padding: const EdgeInsets.all(12),
+                itemCount: _state.messages.length,
+                itemBuilder: (_, i) => MessageBubble(msg: _state.messages[i]),
+              );
+            },
           ),
         ),
         ChatInputBar(controller: _ctrl, onSend: _send)

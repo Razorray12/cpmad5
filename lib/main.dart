@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'shared/state/app_state.dart';
 import 'shared/state/app_scope.dart';
 import 'shared/theme/app_theme.dart';
-import 'package:go_router/go_router.dart';
 import 'shared/navigation/app_router.dart';
 import 'shared/di/locator.dart';
 
@@ -17,7 +16,7 @@ class MediTrackApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScope(
-      notifier: getIt<AppState>(),
+      store: getIt<AppState>(),
       child: MaterialApp.router(
         title: 'MediTrack',
         theme: AppTheme.lightTheme,

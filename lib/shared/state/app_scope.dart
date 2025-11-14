@@ -1,18 +1,27 @@
 import 'package:flutter/widgets.dart';
 import 'app_state.dart';
 
-class AppScope extends InheritedNotifier<AppState> {
-  const AppScope({super.key, required AppState notifier, required Widget child})
-      : super(notifier: notifier, child: child);
+/// Простая обертка над [AppState] для доступа через контекст.
+///
+/// Реактивность обеспечивает MobX через [Observer], а не сам InheritedWidget.
+class AppScope extends InheritedWidget {
+  final AppState store;
+
+  const AppScope({
+    super.key,
+    required this.store,
+    required Widget child,
+  }) : super(child: child);
 
   static AppState of(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<AppScope>();
     assert(scope != null, 'AppScope not found in context');
-    return scope!.notifier!;
+    return scope!.store;
   }
 
   @override
-  bool updateShouldNotify(covariant InheritedNotifier<AppState> oldWidget) {
-    return oldWidget.notifier != notifier;
+  bool updateShouldNotify(covariant AppScope oldWidget) {
+    // Храним один и тот же singleton Store, поэтому тут всегда false.
+    return false;
   }
 }

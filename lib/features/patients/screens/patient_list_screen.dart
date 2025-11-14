@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:go_router/go_router.dart';
 import '../../../shared/state/app_scope.dart';
 import '../models/patient.dart';
@@ -31,9 +32,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final state = AppScope.of(context);
-    final patients = _searchQuery.isEmpty ? state.patients : state.searchPatients(_searchQuery);
-
     return Column(
       children: [
         const SectionHeader(
@@ -77,25 +75,38 @@ class _PatientListScreenState extends State<PatientListScreen> {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: patients.isEmpty
-              ? const Center(
-                  child: Text('Пациенты не найдены', style: TextStyle(fontSize: 16)),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: patients.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final p = patients[index];
-                    return PatientCard(
-                      patient: p,
-                      onTap: () {
-                        context.push('/patient/${p.id}', extra: p);
-                      },
-                      onDelete: () => AppScope.of(context).removePatient(p.id),
-                    );
-                  },
-                ),
+          child: Observer(
+            builder: (context) {
+              final state = AppScope.of(context);
+              final patients = _searchQuery.isEmpty
+                  ? state.patients
+                  : state.searchPatients(_searchQuery);
+
+              if (patients.isEmpty) {
+                return const Center(
+                  child: Text('Пациенты не найдены',
+                      style: TextStyle(fontSize: 16)),
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: patients.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                itemBuilder: (context, index) {
+                  final p = patients[index];
+                  return PatientCard(
+                    patient: p,
+                    onTap: () {
+                      context.push('/patient/${p.id}', extra: p);
+                    },
+                    onDelete: () =>
+                        AppScope.of(context).removePatient(p.id),
+                  );
+                },
+              );
+            },
+          ),
         ),
       ],
     );

@@ -1,19 +1,30 @@
-import 'package:flutter/foundation.dart';
+import 'package:mobx/mobx.dart';
 import '../models/message.dart';
 
-class ChatState extends ChangeNotifier {
-  final List<Message> _messages = [];
-  List<Message> get messages => List.unmodifiable(_messages);
+part 'chat_state.g.dart';
 
+class ChatState = _ChatState with _$ChatState;
+
+abstract class _ChatState with Store {
+  @observable
+  ObservableList<Message> messages = ObservableList<Message>();
+
+  @action
   void send(String text) {
-    if (text.trim().isEmpty) return;
-    _messages.add(Message(author: 'me', text: text.trim(), timestamp: DateTime.now()));
-    notifyListeners();
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
+    messages.add(
+      Message(author: 'me', text: trimmed, timestamp: DateTime.now()),
+    );
   }
 
+  @action
   void receive(String text) {
-    _messages.add(Message(author: 'peer', text: text.trim(), timestamp: DateTime.now()));
-    notifyListeners();
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return;
+    messages.add(
+      Message(author: 'peer', text: trimmed, timestamp: DateTime.now()),
+    );
   }
 }
 
