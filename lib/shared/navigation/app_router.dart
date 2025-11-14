@@ -6,6 +6,7 @@ import '../../pages/vertical/v2_page.dart';
 import '../../pages/vertical/v3_page.dart';
 import '../../pages/vertical/v4_page.dart';
 import '../../pages/vertical/v5_page.dart';
+import '../../pages/vertical/v6_page.dart';
 import '../../pages/horizontal/h1_page.dart';
 import '../../pages/horizontal/h2_page.dart';
 import '../../pages/horizontal/h3_page.dart';
@@ -25,6 +26,7 @@ class AppRouter {
         GoRoute(path: AppRoutes.v3, builder: (_, __) => const V3Page()),
         GoRoute(path: AppRoutes.v4, builder: (_, __) => const V4Page()),
         GoRoute(path: AppRoutes.v5, builder: (_, __) => const V5Page()),
+        GoRoute(path: AppRoutes.v6, builder: (_, __) => const V6Page()),
 
         // Горизонтальная
         GoRoute(path: AppRoutes.h1, builder: (_, __) => const H1Page()),

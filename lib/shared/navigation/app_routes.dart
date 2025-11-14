@@ -18,6 +18,7 @@ class AppRoutes {
   static const String v3 = '/flow/v3';
   static const String v4 = '/flow/v4';
   static const String v5 = '/flow/v5';
+  static const String v6 = '/flow/v6';
 }
 
 

@@ -53,6 +53,14 @@ class PatientDetailScreen extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
+                        onPressed: () => context.push(AppRoutes.v6),
+                        icon: const Icon(Icons.event_note),
+                        label: const Text('К консультациям'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton.icon(
                         onPressed: () => context.push(AppRoutes.v5),
                         icon: const Icon(Icons.chat),
                         label: const Text('К чату'),
