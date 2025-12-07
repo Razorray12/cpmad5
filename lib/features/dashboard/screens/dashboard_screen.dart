@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:go_router/go_router.dart';
 import '../../../shared/state/app_scope.dart';
+import '../../../shared/navigation/app_routes.dart';
 import '../widgets/dashboard_header.dart';
 import '../widgets/dashboard_stat_card.dart';
 import '../widgets/status_stats_item.dart';
@@ -84,6 +86,48 @@ class DashboardScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: 20),
+
+              // Быстрый доступ
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(12.0),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Быстрый доступ',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () => context.push(AppRoutes.v5),
+                            icon: const Icon(Icons.chat),
+                            label: const Text('Чат медперсонала'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
 
               Container(
                 width: double.infinity,

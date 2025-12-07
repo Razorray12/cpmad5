@@ -19,8 +19,8 @@ class AppConstants {
   static const String patientStatusCritical = 'Критический';
   
   // Пол пациентов
-  static const String patientSexMale = 'Мужчина';
-  static const String patientSexFemale = 'Женщина';
+  static const String patientSexMale = 'Мужской';
+  static const String patientSexFemale = 'Женский';
   
   // Форматы дат
   static const String dateFormat = 'dd.MM.yyyy';

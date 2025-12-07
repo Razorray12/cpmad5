@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../../shared/navigation/app_routes.dart';
 import '../../../shared/state/app_scope.dart';
-import '../models/patient.dart';
-import '../widgets/patient_card.dart';
-import '../widgets/patient_form.dart';
-import '../widgets/patient_actions_sheet.dart';
-import '../widgets/patient_edit_form.dart';
-import '../screens/patient_detail_screen.dart';
-import '../../vitals/models/vital_sign.dart';
-import '../../vitals/widgets/vital_form.dart';
 import '../../../shared/widgets/section_header.dart';
-import '../../../shared/widgets/dialog_form_scaffold.dart';
+import '../widgets/patient_card.dart';
 
 class PatientListScreen extends StatefulWidget {
   const PatientListScreen({super.key});
@@ -37,12 +31,43 @@ class _PatientListScreenState extends State<PatientListScreen> {
         const SectionHeader(
           title: 'Список пациентов',
         ),
+        // Кнопки навигации к показателям и консультациям
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Row(
             children: [
               Expanded(
                 child: ElevatedButton.icon(
+                  onPressed: () => context.push(AppRoutes.v4),
+                  icon: const Icon(Icons.favorite),
+                  label: const Text('Все показатели'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade400,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () => context.push(AppRoutes.v6),
+                  icon: const Icon(Icons.event_note),
+                  label: const Text('Все консультации'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange.shade400,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
                   onPressed: () {
                     AppScope.of(context).clearAllData();
                     AppScope.of(context).initializeSampleData();
@@ -109,143 +134,6 @@ class _PatientListScreenState extends State<PatientListScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  void _showAddPatientDialog(BuildContext context) {
-    final formKey = GlobalKey<PatientFormState>();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => DialogFormScaffold<PatientFormState>(
-        title: 'Добавить пациента',
-        formKey: formKey,
-        submitLabel: 'Добавить',
-        onSubmit: () => formKey.currentState?.submit(),
-        child: PatientForm(
-          key: formKey,
-          onSubmit: ({
-            required String firstName,
-            required String lastName,
-            String? middleName,
-            String? birthDate,
-            String? phoneNumber,
-            required String diagnosis,
-            String? room,
-            String? sex,
-            String? admissionDate,
-            String? medications,
-            String? allergies,
-            String? mainDoctor,
-            String? mainDoctorID,
-            required String status,
-            String? imageUrl,
-          }) {
-            AppScope.of(context).addPatient(
-              firstName: firstName,
-              lastName: lastName,
-              middleName: middleName,
-              birthDate: birthDate,
-              phoneNumber: phoneNumber,
-              diagnosis: diagnosis,
-              room: room,
-              sex: sex,
-              admissionDate: admissionDate,
-              medications: medications,
-              allergies: allergies,
-              mainDoctor: mainDoctor,
-              mainDoctorID: mainDoctorID,
-              status: status,
-              imageUrl: imageUrl,
-            );
-            Navigator.pop(ctx);
-          },
-        ),
-      ),
-    );
-  }
-
-  void _showPatientActions(BuildContext context, Patient p) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      builder: (ctx) => PatientActionsSheet(
-        patient: p,
-        onAddVitals: () {
-          Navigator.pop(ctx);
-          _showAddVitalsDialog(context, p.id);
-        },
-        onEdit: () {
-          Navigator.pop(ctx);
-          _showEditPatientDialog(context, p);
-        },
-        onClose: () => Navigator.pop(ctx),
-      ),
-    );
-  }
-
-  void _showEditPatientDialog(BuildContext context, Patient patient) {
-    final formKey = GlobalKey<PatientEditFormState>();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => DialogFormScaffold<PatientEditFormState>(
-        title: 'Редактировать пациента',
-        formKey: formKey,
-        submitLabel: 'Сохранить',
-        onSubmit: () => formKey.currentState?.submit(),
-        child: PatientEditForm(
-          key: formKey,
-          patient: patient,
-          onSubmit: (updatedPatient) {
-            AppScope.of(context).updatePatient(updatedPatient);
-            Navigator.pop(ctx);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Данные пациента обновлены')),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  void _showAddVitalsDialog(BuildContext context, int patientId) {
-    final formKey = GlobalKey<VitalFormState>();
-
-    showDialog(
-      context: context,
-      builder: (ctx) => DialogFormScaffold<VitalFormState>(
-        title: 'Показатели жизнедеятельности',
-        formKey: formKey,
-        submitLabel: 'Сохранить',
-        onSubmit: () => formKey.currentState?.submit(),
-        child: VitalForm(
-          key: formKey,
-          onSubmit: ({
-            required String temperature,
-            required String heartRate,
-            required String respiratoryRate,
-            required String bloodPressure,
-            required String oxygenSaturation,
-            String? bloodGlucose,
-          }) {
-            final vital = VitalSign(
-              timestamp: DateTime.now(),
-              temperature: temperature,
-              heartRate: heartRate,
-              respiratoryRate: respiratoryRate,
-              bloodPressure: bloodPressure,
-              oxygenSaturation: oxygenSaturation,
-              bloodGlucose: bloodGlucose,
-            );
-            AppScope.of(context).addVital(patientId, vital);
-            Navigator.pop(ctx);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Показатели сохранены')),
-            );
-          },
-        ),
-      ),
     );
   }
 }

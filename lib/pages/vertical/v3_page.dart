@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../shared/navigation/app_routes.dart';
 import '../../shared/widgets/vertical_step_page.dart';
 import '../../shared/state/app_scope.dart';
 import '../../features/patients/screens/patient_detail_screen.dart';
@@ -16,8 +15,7 @@ class V3Page extends StatelessWidget {
       child: patient == null
           ? const Center(child: Text('Нет пациентов'))
           : PatientDetailScreen(patient: patient),
-      nextRoute: AppRoutes.v4,
-      nextLabel: 'К показателям',
+      showNextButton: false,
     );
   }
 }

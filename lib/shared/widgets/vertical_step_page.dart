@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../navigation/app_routes.dart';
 
 class VerticalStepPage extends StatelessWidget {
   final String title;
@@ -9,6 +10,7 @@ class VerticalStepPage extends StatelessWidget {
   final VoidCallback? onNext;
   final Widget? floatingActionButton;
   final bool showNextButton;
+  final bool showProfileButton;
 
   const VerticalStepPage({
     super.key,
@@ -19,6 +21,7 @@ class VerticalStepPage extends StatelessWidget {
     this.onNext,
     this.floatingActionButton,
     this.showNextButton = true,
+    this.showProfileButton = true,
   });
 
   @override
@@ -27,6 +30,15 @@ class VerticalStepPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(title),
         centerTitle: true,
+        actions: showProfileButton
+            ? [
+                IconButton(
+                  icon: const Icon(Icons.person),
+                  tooltip: 'Профиль',
+                  onPressed: () => context.push(AppRoutes.v7),
+                ),
+              ]
+            : null,
       ),
       floatingActionButton: floatingActionButton == null
           ? null

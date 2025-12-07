@@ -3,32 +3,69 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import '../../../shared/state/app_scope.dart';
 import '../models/patient.dart';
 import '../widgets/patient_card.dart';
+import '../widgets/patient_edit_form.dart';
 import '../../vitals/models/vital_sign.dart';
 import '../../vitals/widgets/vital_card.dart';
-import '../../../shared/widgets/status_avatar.dart';
-import '../../../shared/navigation/app_routes.dart';
-import 'package:go_router/go_router.dart';
+import '../../vitals/widgets/vital_form.dart';
+import '../../consultations/models/consultation.dart';
+import '../../../shared/widgets/dialog_form_scaffold.dart';
 
 /// Страница деталей пациента - пример вертикальной навигации (Navigator.push)
-class PatientDetailScreen extends StatelessWidget {
+class PatientDetailScreen extends StatefulWidget {
   final Patient patient;
 
   const PatientDetailScreen({super.key, required this.patient});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(patient.fullName),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
-      body: Observer(
-        builder: (context) {
-          final state = AppScope.of(context);
-          final vitals = state.vitalsFor(patient.id);
-          final consultations = state.consultationsForPatient(patient.id);
+  State<PatientDetailScreen> createState() => _PatientDetailScreenState();
+}
 
-          return SingleChildScrollView(
+class _PatientDetailScreenState extends State<PatientDetailScreen> {
+  late int _patientId;
+
+  @override
+  void initState() {
+    super.initState();
+    _patientId = widget.patient.id;
+  }
+
+  Patient? _getCurrentPatient(BuildContext context) {
+    final state = AppScope.of(context);
+    try {
+      return state.patients.firstWhere((p) => p.id == _patientId);
+    } catch (_) {
+      return widget.patient;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Observer(
+      builder: (context) {
+        final state = AppScope.of(context);
+        final patient = _getCurrentPatient(context);
+        if (patient == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Пациент не найден')),
+            body: const Center(child: Text('Пациент был удалён')),
+          );
+        }
+        final vitals = state.vitalsFor(patient.id);
+        final consultations = state.consultationsForPatient(patient.id);
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(patient.fullName),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                tooltip: 'Редактировать',
+                onPressed: () => _showEditPatientDialog(context, patient),
+              ),
+            ],
+          ),
+          body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,35 +77,7 @@ class PatientDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // Быстрые действия
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => context.push(AppRoutes.v4),
-                        icon: const Icon(Icons.favorite),
-                        label: const Text('К показателям'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => context.push(AppRoutes.v6),
-                        icon: const Icon(Icons.event_note),
-                        label: const Text('К консультациям'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => context.push(AppRoutes.v5),
-                        icon: const Icon(Icons.chat),
-                        label: const Text('К чату'),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 8),
 
                 // Основная информация
                 _buildSection(
@@ -116,43 +125,57 @@ class PatientDetailScreen extends StatelessWidget {
                     ],
                   ),
 
-                // Последние показатели
-                if (vitals.isNotEmpty)
-                  _buildSection(
-                    title: 'Последние показатели',
-                    children: vitals.take(3).map((vital) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: VitalCard(
-                          vital: vital,
-                          patientId: patient.id,
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                // Показатели пациента
+                _buildSectionWithAction(
+                  context: context,
+                  title: 'Показатели (${vitals.length})',
+                  actionLabel: 'Добавить',
+                  onAction: () => _showAddVitalsDialog(context, patient.id),
+                  children: vitals.isEmpty
+                      ? [const Text('Нет показателей', style: TextStyle(color: Colors.grey))]
+                      : vitals.map((vital) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: VitalCard(
+                              vital: vital,
+                              patientId: patient.id,
+                              onDelete: () => state.removeVital(patient.id, vital),
+                            ),
+                          );
+                        }).toList(),
+                ),
 
-                // Последние консультации
-                if (consultations.isNotEmpty)
-                  _buildSection(
-                    title: 'Последние консультации',
-                    children: consultations.take(3).map((consultation) {
-                      return Card(
-                        child: ListTile(
-                          leading: const Icon(Icons.event_note),
-                          title: Text(consultation.note),
-                          subtitle: Text(
-                            '${_formatDateTime(consultation.dateTime)}${consultation.doctorName != null ? ' • ${consultation.doctorName}' : ''}',
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
+                // Консультации пациента
+                _buildSectionWithAction(
+                  context: context,
+                  title: 'Консультации (${consultations.length})',
+                  actionLabel: 'Добавить',
+                  onAction: () => _showAddConsultationDialog(context, patient.id),
+                  children: consultations.isEmpty
+                      ? [const Text('Нет консультаций', style: TextStyle(color: Colors.grey))]
+                      : consultations.map((consultation) {
+                          return Card(
+                            child: ListTile(
+                              leading: const Icon(Icons.event_note),
+                              title: Text(consultation.note),
+                              subtitle: Text(
+                                '${_formatDateTime(consultation.dateTime)}${consultation.doctorName != null ? ' • ${consultation.doctorName}' : ''}',
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () => state.removeConsultation(consultation),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                ),
               ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
+
   }
 
   Widget _buildSection({required String title, required List<Widget> children}) {
@@ -202,8 +225,178 @@ class PatientDetailScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildSectionWithAction({
+    required BuildContext context,
+    required String title,
+    required String actionLabel,
+    required VoidCallback onAction,
+    required List<Widget> children,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            TextButton.icon(
+              onPressed: onAction,
+              icon: const Icon(Icons.add, size: 18),
+              label: Text(actionLabel),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
   String _formatDateTime(DateTime dateTime) {
     return '${dateTime.day}.${dateTime.month}.${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+  }
+
+  void _showEditPatientDialog(BuildContext context, Patient patient) {
+    final formKey = GlobalKey<PatientEditFormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => DialogFormScaffold<PatientEditFormState>(
+        title: 'Редактировать пациента',
+        formKey: formKey,
+        submitLabel: 'Сохранить',
+        onSubmit: () => formKey.currentState?.submit(),
+        child: PatientEditForm(
+          key: formKey,
+          patient: patient,
+          onSubmit: (updatedPatient) {
+            AppScope.of(context).updatePatient(updatedPatient);
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Данные пациента обновлены')),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showAddVitalsDialog(BuildContext context, int patientId) {
+    final formKey = GlobalKey<VitalFormState>();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => DialogFormScaffold<VitalFormState>(
+        title: 'Добавить показатели',
+        formKey: formKey,
+        submitLabel: 'Сохранить',
+        onSubmit: () => formKey.currentState?.submit(),
+        child: VitalForm(
+          key: formKey,
+          onSubmit: ({
+            required String temperature,
+            required String heartRate,
+            required String respiratoryRate,
+            required String bloodPressure,
+            required String oxygenSaturation,
+            String? bloodGlucose,
+          }) {
+            final vital = VitalSign(
+              timestamp: DateTime.now(),
+              temperature: temperature,
+              heartRate: heartRate,
+              respiratoryRate: respiratoryRate,
+              bloodPressure: bloodPressure,
+              oxygenSaturation: oxygenSaturation,
+              bloodGlucose: bloodGlucose,
+            );
+            AppScope.of(context).addVital(patientId, vital);
+            Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Показатели сохранены')),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showAddConsultationDialog(BuildContext context, int patientId) {
+    final noteController = TextEditingController();
+    final doctorController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Новая консультация'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: doctorController,
+                decoration: const InputDecoration(
+                  labelText: 'Врач (опционально)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: noteController,
+                decoration: const InputDecoration(
+                  labelText: 'Описание консультации',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Отмена'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (noteController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Введите описание')),
+                );
+                return;
+              }
+              AppScope.of(context).addConsultation(
+                Consultation(
+                  patientId: patientId,
+                  dateTime: DateTime.now(),
+                  doctorName: doctorController.text.trim().isEmpty
+                      ? null
+                      : doctorController.text.trim(),
+                  note: noteController.text.trim(),
+                ),
+              );
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Консультация добавлена')),
+              );
+            },
+            child: const Text('Сохранить'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
