@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'shared/state/app_state.dart';
-import 'shared/state/app_scope.dart';
-import 'shared/theme/app_theme.dart';
-import 'shared/navigation/app_router.dart';
-import 'shared/di/locator.dart';
+import 'presentation/state/app_state.dart';
+import 'presentation/state/app_scope.dart';
+import 'ui/shared/theme/app_theme.dart';
+import 'ui/shared/navigation/app_router.dart';
+import 'ui/shared/di/locator.dart';
 
-void main() {
-  setupLocator();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await setupLocator();
   runApp(const MediTrackApp());
 }
 
@@ -26,4 +27,3 @@ class MediTrackApp extends StatelessWidget {
     );
   }
 }
- 
