@@ -11,6 +11,10 @@ class AppRoutes {
   static const String chat = '/chat';
   static const String profile = '/profile';
 
+  // Medical screens (API)
+  static const String covidStats = '/medical/covid';
+  static const String drugSearch = '/medical/drugs';
+
   // Horizontal flow (Госпитализация)
   static const String h1 = '/flow/h1';
   static const String h2 = '/flow/h2';

@@ -10,4 +10,6 @@ export 'consultation.dart';
 export 'user.dart';
 export 'message.dart';
 export 'disease_info.dart';
+export 'covid_stats.dart';
+export 'drug_info.dart';
 

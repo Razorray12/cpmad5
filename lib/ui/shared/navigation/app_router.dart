@@ -5,6 +5,8 @@ import '../di/locator.dart';
 import '../../features/auth/state/auth_state.dart';
 import '../../features/auth/screens/login_screen.dart';
 import '../../features/auth/screens/register_screen.dart';
+import '../../features/medical/screens/covid_stats_screen.dart';
+import '../../features/medical/screens/drug_search_screen.dart';
 import '../../pages/vertical/v1_page.dart';
 import '../../pages/vertical/v2_page.dart';
 import '../../pages/vertical/v3_page.dart';
@@ -69,6 +71,10 @@ class AppRouter {
         GoRoute(path: AppRoutes.h3, builder: (_, __) => const H3Page()),
         GoRoute(path: AppRoutes.h4, builder: (_, __) => const H4Page()),
         GoRoute(path: AppRoutes.h5, builder: (_, __) => const H5Page()),
+
+        // Медицинская информация (API)
+        GoRoute(path: AppRoutes.covidStats, builder: (_, __) => const CovidStatsScreen()),
+        GoRoute(path: AppRoutes.drugSearch, builder: (_, __) => const DrugSearchScreen()),
 
         // Детали пациента
         GoRoute(

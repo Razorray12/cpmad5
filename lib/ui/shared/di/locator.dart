@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
+import 'package:dio/dio.dart';
 
-// Data Sources
+// Data Sources - Local
 import '../../../data/datasources/local/local_patient_datasource.dart';
 import '../../../data/datasources/local/local_vital_datasource.dart';
 import '../../../data/datasources/local/local_consultation_datasource.dart';
@@ -10,12 +11,22 @@ import '../../../data/datasources/local/shared_prefs_datasource.dart';
 import '../../../data/datasources/local/secure_storage_datasource.dart';
 import '../../../data/datasources/local/drift_datasource.dart';
 
+// Data Sources - Remote
+import '../../../data/datasources/remote/dio_client.dart';
+import '../../../data/datasources/remote/api/disease_api.dart';
+import '../../../data/datasources/remote/api/drug_api.dart';
+import '../../../data/datasources/remote/api/fda_api.dart';
+import '../../../data/datasources/remote/remote_covid_datasource.dart';
+import '../../../data/datasources/remote/remote_drug_datasource.dart';
+import '../../../data/datasources/remote/remote_fda_datasource.dart';
+
 // Repositories
 import '../../../data/repositories/patient_repository_impl.dart';
 import '../../../data/repositories/vital_repository_impl.dart';
 import '../../../data/repositories/consultation_repository_impl.dart';
 import '../../../data/repositories/auth_repository_impl.dart';
 import '../../../data/repositories/chat_repository_impl.dart';
+import '../../../data/repositories/medical_info_repository_impl.dart';
 
 // Domain Repositories (interfaces)
 import '../../../domain/repositories/patient_repository.dart';
@@ -23,6 +34,7 @@ import '../../../domain/repositories/vital_repository.dart';
 import '../../../domain/repositories/consultation_repository.dart';
 import '../../../domain/repositories/auth_repository.dart';
 import '../../../domain/repositories/chat_repository.dart';
+import '../../../domain/repositories/medical_info_repository.dart';
 
 // Use Cases
 import '../../../domain/usecases/patient/get_patients_usecase.dart';
@@ -31,11 +43,13 @@ import '../../../domain/usecases/vitals/vitals_usecases.dart';
 import '../../../domain/usecases/consultation/consultation_usecases.dart';
 import '../../../domain/usecases/auth/auth_usecases.dart';
 import '../../../domain/usecases/settings/settings_usecases.dart';
+import '../../../domain/usecases/medical/medical_usecases.dart';
 
 // State
 import '../../../presentation/state/app_state.dart';
 import '../../../presentation/state/theme_state.dart';
 import '../../features/auth/state/auth_state.dart';
+import '../../features/medical/state/medical_state.dart';
 
 final GetIt getIt = GetIt.instance;
 
@@ -107,6 +121,70 @@ Future<void> setupLocator() async {
   }
 
   // ============================================
+  // REMOTE DATA SOURCES (Singleton)
+  // ============================================
+
+  // Dio клиенты для различных API
+  if (!getIt.isRegistered<Dio>(instanceName: 'diseaseApi')) {
+    getIt.registerLazySingleton<Dio>(
+      () => DioClient.createDiseaseApiClient(),
+      instanceName: 'diseaseApi',
+    );
+  }
+
+  if (!getIt.isRegistered<Dio>(instanceName: 'drugApi')) {
+    getIt.registerLazySingleton<Dio>(
+      () => DioClient.createDrugApiClient(),
+      instanceName: 'drugApi',
+    );
+  }
+
+  if (!getIt.isRegistered<Dio>(instanceName: 'fdaApi')) {
+    getIt.registerLazySingleton<Dio>(
+      () => DioClient.createFdaApiClient(),
+      instanceName: 'fdaApi',
+    );
+  }
+
+  // Retrofit API клиенты
+  if (!getIt.isRegistered<DiseaseApi>()) {
+    getIt.registerLazySingleton<DiseaseApi>(
+      () => DiseaseApi(getIt<Dio>(instanceName: 'diseaseApi')),
+    );
+  }
+
+  if (!getIt.isRegistered<DrugApi>()) {
+    getIt.registerLazySingleton<DrugApi>(
+      () => DrugApi(getIt<Dio>(instanceName: 'drugApi')),
+    );
+  }
+
+  if (!getIt.isRegistered<FdaApi>()) {
+    getIt.registerLazySingleton<FdaApi>(
+      () => FdaApi(getIt<Dio>(instanceName: 'fdaApi')),
+    );
+  }
+
+  // Remote DataSources
+  if (!getIt.isRegistered<RemoteCovidDataSource>()) {
+    getIt.registerLazySingleton<RemoteCovidDataSource>(
+      () => RemoteCovidDataSource(getIt<DiseaseApi>()),
+    );
+  }
+
+  if (!getIt.isRegistered<RemoteDrugDataSource>()) {
+    getIt.registerLazySingleton<RemoteDrugDataSource>(
+      () => RemoteDrugDataSource(getIt<DrugApi>()),
+    );
+  }
+
+  if (!getIt.isRegistered<RemoteFdaDataSource>()) {
+    getIt.registerLazySingleton<RemoteFdaDataSource>(
+      () => RemoteFdaDataSource(getIt<FdaApi>()),
+    );
+  }
+
+  // ============================================
   // REPOSITORIES (Singleton)
   // ============================================
   
@@ -137,6 +215,16 @@ Future<void> setupLocator() async {
   if (!getIt.isRegistered<ChatRepository>()) {
     getIt.registerLazySingleton<ChatRepository>(
       () => ChatRepositoryImpl(getIt<LocalChatDataSource>()),
+    );
+  }
+
+  // Medical Info Repository (использует remote data sources)
+  if (!getIt.isRegistered<MedicalInfoRepository>()) {
+    getIt.registerLazySingleton<MedicalInfoRepository>(
+      () => MedicalInfoRepositoryImpl(
+        getIt<RemoteCovidDataSource>(),
+        getIt<RemoteDrugDataSource>(),
+      ),
     );
   }
 
@@ -285,6 +373,43 @@ Future<void> setupLocator() async {
     );
   }
 
+  // Medical Use Cases (COVID-19 + Drugs)
+  if (!getIt.isRegistered<GetGlobalCovidStatsUseCase>()) {
+    getIt.registerFactory<GetGlobalCovidStatsUseCase>(
+      () => GetGlobalCovidStatsUseCase(getIt<MedicalInfoRepository>()),
+    );
+  }
+
+  if (!getIt.isRegistered<GetCountryCovidStatsUseCase>()) {
+    getIt.registerFactory<GetCountryCovidStatsUseCase>(
+      () => GetCountryCovidStatsUseCase(getIt<MedicalInfoRepository>()),
+    );
+  }
+
+  if (!getIt.isRegistered<GetAllCountriesCovidStatsUseCase>()) {
+    getIt.registerFactory<GetAllCountriesCovidStatsUseCase>(
+      () => GetAllCountriesCovidStatsUseCase(getIt<MedicalInfoRepository>()),
+    );
+  }
+
+  if (!getIt.isRegistered<GetCovidHistoricalUseCase>()) {
+    getIt.registerFactory<GetCovidHistoricalUseCase>(
+      () => GetCovidHistoricalUseCase(getIt<MedicalInfoRepository>()),
+    );
+  }
+
+  if (!getIt.isRegistered<SearchDrugsUseCase>()) {
+    getIt.registerFactory<SearchDrugsUseCase>(
+      () => SearchDrugsUseCase(getIt<MedicalInfoRepository>()),
+    );
+  }
+
+  if (!getIt.isRegistered<GetDrugAdverseEventsUseCase>()) {
+    getIt.registerFactory<GetDrugAdverseEventsUseCase>(
+      () => GetDrugAdverseEventsUseCase(getIt<MedicalInfoRepository>()),
+    );
+  }
+
   // ============================================
   // STATE (Singleton)
   // ============================================
@@ -328,6 +453,20 @@ Future<void> setupLocator() async {
         getCurrentUserUseCase: getIt<GetCurrentUserUseCase>(),
         updateProfileUseCase: getIt<UpdateProfileUseCase>(),
         checkAuthUseCase: getIt<CheckAuthUseCase>(),
+      ),
+    );
+  }
+
+  // MedicalState для работы с медицинской информацией из API
+  if (!getIt.isRegistered<MedicalState>()) {
+    getIt.registerLazySingleton<MedicalState>(
+      () => MedicalState(
+        getGlobalCovidStatsUseCase: getIt<GetGlobalCovidStatsUseCase>(),
+        getCountryCovidStatsUseCase: getIt<GetCountryCovidStatsUseCase>(),
+        getAllCountriesCovidStatsUseCase: getIt<GetAllCountriesCovidStatsUseCase>(),
+        getCovidHistoricalUseCase: getIt<GetCovidHistoricalUseCase>(),
+        searchDrugsUseCase: getIt<SearchDrugsUseCase>(),
+        getDrugAdverseEventsUseCase: getIt<GetDrugAdverseEventsUseCase>(),
       ),
     );
   }
