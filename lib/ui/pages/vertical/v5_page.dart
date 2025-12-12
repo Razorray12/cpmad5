@@ -9,10 +9,8 @@ class V5Page extends StatelessWidget {
   Widget build(BuildContext context) {
     return const VerticalStepPage(
       title: 'Чат медперсонала',
-      child: ChatScreen(),
       showNextButton: false,
+      child: ChatScreen(),
     );
   }
 }
-
-

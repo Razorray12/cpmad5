@@ -28,20 +28,26 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.2
+  drift: ^2.13.0
+  drift_flutter: ^0.1.0
+  path_provider: ^2.1.0
+  path: ^1.8.3
   # State Management (MobX)
   mobx: ^2.5.0
   flutter_mobx: ^2.3.0
-  
+
   flutter:
     sdk: flutter
 
   # UI
   cupertino_icons: ^1.0.8
   cached_network_image: ^3.3.1
-  
+
   # Navigation
   go_router: ^14.0.0
-  
+
   # Dependency Injection
   get_it: ^7.7.0
 
@@ -49,6 +55,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  drift_dev: ^2.13.0
 
   # MobX code generation
   mobx_codegen: ^2.6.0

@@ -6,6 +6,9 @@ import '../../../data/datasources/local/local_vital_datasource.dart';
 import '../../../data/datasources/local/local_consultation_datasource.dart';
 import '../../../data/datasources/local/local_auth_datasource.dart';
 import '../../../data/datasources/local/local_chat_datasource.dart';
+import '../../../data/datasources/local/shared_prefs_datasource.dart';
+import '../../../data/datasources/local/secure_storage_datasource.dart';
+import '../../../data/datasources/local/drift_datasource.dart';
 
 // Repositories
 import '../../../data/repositories/patient_repository_impl.dart';
@@ -27,9 +30,11 @@ import '../../../domain/usecases/patient/manage_patient_usecase.dart';
 import '../../../domain/usecases/vitals/vitals_usecases.dart';
 import '../../../domain/usecases/consultation/consultation_usecases.dart';
 import '../../../domain/usecases/auth/auth_usecases.dart';
+import '../../../domain/usecases/settings/settings_usecases.dart';
 
 // State
 import '../../../presentation/state/app_state.dart';
+import '../../../presentation/state/theme_state.dart';
 import '../../features/auth/state/auth_state.dart';
 
 final GetIt getIt = GetIt.instance;
@@ -39,6 +44,33 @@ final GetIt getIt = GetIt.instance;
 /// Регистрирует все зависимости согласно Clean Architecture:
 /// DataSources -> Repositories -> UseCases -> State
 Future<void> setupLocator() async {
+  // ============================================
+  // LOCAL STORAGE DATA SOURCES (Singleton)
+  // ============================================
+  
+  // SharedPreferences для хранения темы приложения
+  if (!getIt.isRegistered<SharedPrefsDataSource>()) {
+    getIt.registerLazySingleton<SharedPrefsDataSource>(
+      () => SharedPrefsDataSource(),
+    );
+  }
+  
+  // Flutter Secure Storage для токенов авторизации
+  if (!getIt.isRegistered<SecureStorageDataSource>()) {
+    getIt.registerLazySingleton<SecureStorageDataSource>(
+      () => SecureStorageDataSource(),
+    );
+  }
+  
+  // Drift (SQLite) для хранения данных пациентов
+  if (!getIt.isRegistered<DriftDataSource>()) {
+    final driftDataSource = DriftDataSource();
+    await driftDataSource.init();
+    getIt.registerLazySingleton<DriftDataSource>(
+      () => driftDataSource,
+    );
+  }
+  
   // ============================================
   // DATA SOURCES (Singleton)
   // ============================================
@@ -61,9 +93,10 @@ Future<void> setupLocator() async {
     );
   }
   
+  // LocalAuthDataSource использует SecureStorageDataSource
   if (!getIt.isRegistered<LocalAuthDataSource>()) {
     getIt.registerLazySingleton<LocalAuthDataSource>(
-      () => LocalAuthDataSource(),
+      () => LocalAuthDataSource(getIt<SecureStorageDataSource>()),
     );
   }
   
@@ -239,9 +272,32 @@ Future<void> setupLocator() async {
     );
   }
 
+  // Theme Use Cases (SharedPreferences)
+  if (!getIt.isRegistered<GetThemeUseCase>()) {
+    getIt.registerFactory<GetThemeUseCase>(
+      () => GetThemeUseCase(getIt<SharedPrefsDataSource>()),
+    );
+  }
+  
+  if (!getIt.isRegistered<SetThemeUseCase>()) {
+    getIt.registerFactory<SetThemeUseCase>(
+      () => SetThemeUseCase(getIt<SharedPrefsDataSource>()),
+    );
+  }
+
   // ============================================
   // STATE (Singleton)
   // ============================================
+  
+  // ThemeState для управления темой
+  if (!getIt.isRegistered<ThemeState>()) {
+    final themeState = ThemeState(
+      getThemeUseCase: getIt<GetThemeUseCase>(),
+      setThemeUseCase: getIt<SetThemeUseCase>(),
+    );
+    await themeState.loadTheme();
+    getIt.registerLazySingleton<ThemeState>(() => themeState);
+  }
   
   if (!getIt.isRegistered<AppState>()) {
     getIt.registerLazySingleton<AppState>(

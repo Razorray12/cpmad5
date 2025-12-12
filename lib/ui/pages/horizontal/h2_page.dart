@@ -22,50 +22,6 @@ class _H2PageState extends State<H2Page> {
 
     return HorizontalStepPage(
       title: 'Госпитализация: Регистрация пациента',
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: PatientForm(
-          key: _formKey,
-          onSubmit: ({
-            required String firstName,
-            required String lastName,
-            String? middleName,
-            String? birthDate,
-            String? phoneNumber,
-            required String diagnosis,
-            String? room,
-            String? sex,
-            String? admissionDate,
-            String? medications,
-            String? allergies,
-            String? mainDoctor,
-            String? mainDoctorID,
-            required String status,
-            String? imageUrl,
-          }) async {
-            final patientStatus = PatientStatus.fromString(status);
-            final created = await app.addPatient(
-              firstName: firstName,
-              lastName: lastName,
-              middleName: middleName,
-              birthDate: birthDate,
-              phoneNumber: phoneNumber,
-              diagnosis: diagnosis,
-              room: room,
-              sex: sex,
-              admissionDate: admissionDate,
-              medications: medications,
-              allergies: allergies,
-              mainDoctor: mainDoctor,
-              mainDoctorID: mainDoctorID,
-              status: patientStatus,
-              imageUrl: imageUrl,
-            );
-            app.setAdmissionPatientId(created.id);
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Пациент добавлен')));
-          },
-        ),
-      ),
       nextRoute: AppRoutes.h3,
       nextLabel: 'К первичным показателям',
       onNext: () async {
@@ -73,6 +29,53 @@ class _H2PageState extends State<H2Page> {
         // Навигация вперёд
         context.go(AppRoutes.h3);
       },
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: PatientForm(
+          key: _formKey,
+          onSubmit:
+              ({
+                required String firstName,
+                required String lastName,
+                String? middleName,
+                String? birthDate,
+                String? phoneNumber,
+                required String diagnosis,
+                String? room,
+                String? sex,
+                String? admissionDate,
+                String? medications,
+                String? allergies,
+                String? mainDoctor,
+                String? mainDoctorID,
+                required String status,
+                String? imageUrl,
+              }) async {
+                final patientStatus = PatientStatus.fromString(status);
+                final created = await app.addPatient(
+                  firstName: firstName,
+                  lastName: lastName,
+                  middleName: middleName,
+                  birthDate: birthDate,
+                  phoneNumber: phoneNumber,
+                  diagnosis: diagnosis,
+                  room: room,
+                  sex: sex,
+                  admissionDate: admissionDate,
+                  medications: medications,
+                  allergies: allergies,
+                  mainDoctor: mainDoctor,
+                  mainDoctorID: mainDoctorID,
+                  status: patientStatus,
+                  imageUrl: imageUrl,
+                );
+                app.setAdmissionPatientId(created.id);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Пациент добавлен')),
+                );
+              },
+        ),
+      ),
     );
   }
 }

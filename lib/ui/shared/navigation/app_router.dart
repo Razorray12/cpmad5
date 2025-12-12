@@ -21,7 +21,14 @@ import '../../features/patients/screens/patient_detail_screen.dart';
 import '../../../core/models/patient.dart';
 
 class AppRouter {
-  static GoRouter createRouter() {
+  static GoRouter? _router;
+
+  static GoRouter get router {
+    _router ??= _createRouter();
+    return _router!;
+  }
+
+  static GoRouter _createRouter() {
     return GoRouter(
       initialLocation: AppRoutes.login,
       redirect: (context, state) {

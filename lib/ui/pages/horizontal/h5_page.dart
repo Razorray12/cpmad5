@@ -15,10 +15,18 @@ class H5Page extends StatelessWidget {
     final app = AppScope.of(context);
     final patient = app.admissionPatient;
     final vitals = patient == null ? [] : app.vitalsFor(patient.id);
-    final consultations = patient == null ? <Consultation>[] : app.consultationsForPatient(patient.id);
+    final consultations = patient == null
+        ? <Consultation>[]
+        : app.consultationsForPatient(patient.id);
 
     return HorizontalStepPage(
       title: 'Госпитализация: Итог',
+      nextRoute: AppRoutes.v1,
+      nextLabel: 'Завершить и перейти на панель',
+      onNext: () {
+        app.clearAdmission();
+        context.go(AppRoutes.v1);
+      },
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -60,12 +68,6 @@ class H5Page extends StatelessWidget {
           ],
         ),
       ),
-      nextRoute: AppRoutes.v1,
-      nextLabel: 'Завершить и перейти на панель',
-      onNext: () {
-        app.clearAdmission();
-        context.go(AppRoutes.v1);
-      },
     );
   }
 }

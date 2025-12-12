@@ -9,10 +9,8 @@ class V4Page extends StatelessWidget {
   Widget build(BuildContext context) {
     return const VerticalStepPage(
       title: 'Показатели',
-      child: VitalSignsScreen(),
       showNextButton: false,
+      child: VitalSignsScreen(),
     );
   }
 }
-
-

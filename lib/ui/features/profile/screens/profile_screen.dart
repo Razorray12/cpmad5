@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import '../../../shared/di/locator.dart';
 import '../../../../presentation/state/app_scope.dart';
+import '../../../../presentation/state/theme_state.dart';
 import '../../auth/state/auth_state.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/profile_info_card.dart';
@@ -13,6 +14,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = getIt<AuthState>();
+    final themeState = getIt<ThemeState>();
     
     return Observer(
       builder: (context) {
@@ -20,6 +22,7 @@ class ProfileScreen extends StatelessWidget {
         final app = AppScope.of(context);
         final totalPatients = app.patients.length;
         final totalConsultations = app.consultationsCount;
+        final isDark = themeState.isDarkTheme;
         
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -32,6 +35,44 @@ class ProfileScreen extends StatelessWidget {
               ),
               
               const SizedBox(height: 24),
+              
+              // Переключатель темы
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(16.0),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          isDark ? Icons.dark_mode : Icons.light_mode,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Тёмная тема',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Switch(
+                      value: isDark,
+                      onChanged: (value) => themeState.setTheme(value),
+                    ),
+                  ],
+                ),
+              ),
+              
+              const SizedBox(height: 16),
               
               const ProfileInfoCard(
                 title: 'Образование',
@@ -67,18 +108,18 @@ class ProfileScreen extends StatelessWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.all(20.0),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(16.0),
-                  border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Статистика работы',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -120,23 +161,21 @@ class ProfileScreen extends StatelessWidget {
                       icon: const Icon(Icons.edit),
                       label: const Text('Редактировать'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Настройки приложения')),
-                        );
+                      onPressed: () async {
+                        await auth.logout();
                       },
-                      icon: const Icon(Icons.settings),
-                      label: const Text('Настройки'),
+                      icon: const Icon(Icons.logout),
+                      label: const Text('Выйти'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
+                        backgroundColor: Colors.red,
                         foregroundColor: Colors.white,
                       ),
                     ),

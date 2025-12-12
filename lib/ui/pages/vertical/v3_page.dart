@@ -12,10 +12,10 @@ class V3Page extends StatelessWidget {
     final patient = app.patients.isNotEmpty ? app.patients.first : null;
     return VerticalStepPage(
       title: 'Карточка пациента',
+      showNextButton: false,
       child: patient == null
           ? const Center(child: Text('Нет пациентов'))
           : PatientDetailScreen(patient: patient),
-      showNextButton: false,
     );
   }
 }

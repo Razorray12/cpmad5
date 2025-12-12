@@ -9,11 +9,8 @@ class V6Page extends StatelessWidget {
   Widget build(BuildContext context) {
     return const VerticalStepPage(
       title: 'Консультации',
-      child: ConsultationsScreen(),
       showNextButton: false,
+      child: ConsultationsScreen(),
     );
   }
 }
-
-
-

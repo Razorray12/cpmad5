@@ -16,7 +16,6 @@ class _V1PageState extends State<V1Page> {
   Widget build(BuildContext context) {
     return VerticalStepPage(
       title: 'Панель',
-      child: const DashboardScreen(),
       nextRoute: AppRoutes.v2,
       nextLabel: 'К пациентам',
       floatingActionButton: FloatingActionButton.extended(
@@ -24,6 +23,7 @@ class _V1PageState extends State<V1Page> {
         icon: const Icon(Icons.playlist_add),
         label: const Text('Новая госпитализация'),
       ),
+      child: const DashboardScreen(),
     );
   }
 }

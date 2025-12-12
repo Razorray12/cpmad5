@@ -34,29 +34,43 @@ class _H4PageState extends State<H4Page> {
     if (!hasNewPatient) {
       return HorizontalStepPage(
         title: 'Госпитализация: Первичная консультация',
-        child: const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: EmptyState(icon: Icons.info_outline, message: 'Нельзя оформить первичную консультацию: новый пациент не зарегистрирован.'),
-        ),
         nextRoute: AppRoutes.h5,
         nextLabel: 'К итогу госпитализации',
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: EmptyState(
+            icon: Icons.info_outline,
+            message:
+                'Нельзя оформить первичную консультацию: новый пациент не зарегистрирован.',
+          ),
+        ),
       );
     }
 
     if (!hasVitals) {
       return HorizontalStepPage(
         title: 'Госпитализация: Первичная консультация',
-        child: const Padding(
-          padding: EdgeInsets.all(16.0),
-          child: EmptyState(icon: Icons.warning_amber, message: 'Нельзя оформить первичную консультацию: не внесены первичные показатели.'),
-        ),
         nextRoute: AppRoutes.h5,
         nextLabel: 'К итогу госпитализации',
+        child: const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: EmptyState(
+            icon: Icons.warning_amber,
+            message:
+                'Нельзя оформить первичную консультацию: не внесены первичные показатели.',
+          ),
+        ),
       );
     }
 
     return HorizontalStepPage(
       title: 'Госпитализация: Первичная консультация',
+      nextRoute: AppRoutes.h5,
+      nextLabel: 'К итогу госпитализации',
+      onNext: () {
+        _formKey.currentState?.submit();
+        context.go(AppRoutes.h5);
+      },
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ConsultationEditForm(
@@ -64,16 +78,12 @@ class _H4PageState extends State<H4Page> {
           consultation: draft,
           onSubmit: (updated) {
             app.addConsultation(updated);
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Консультация сохранена')));
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Консультация сохранена')),
+            );
           },
         ),
       ),
-      nextRoute: AppRoutes.h5,
-      nextLabel: 'К итогу госпитализации',
-      onNext: () {
-        _formKey.currentState?.submit();
-        context.go(AppRoutes.h5);
-      },
     );
   }
 }

@@ -13,12 +13,9 @@ class H1Page extends StatelessWidget {
     AppScope.of(context).clearAdmission();
     return const HorizontalStepPage(
       title: 'Госпитализация: Триаж и справка',
-      child: Padding(
-        padding: EdgeInsets.all(8.0),
-        child: AiReferenceScreen(),
-      ),
       nextRoute: AppRoutes.h2,
       nextLabel: 'К регистрации пациента',
+      child: Padding(padding: EdgeInsets.all(8.0), child: AiReferenceScreen()),
     );
   }
 }

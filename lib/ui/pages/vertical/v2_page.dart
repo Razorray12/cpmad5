@@ -9,10 +9,8 @@ class V2Page extends StatelessWidget {
   Widget build(BuildContext context) {
     return const VerticalStepPage(
       title: 'Пациенты',
-      child: PatientListScreen(),
       showNextButton: false,
+      child: PatientListScreen(),
     );
   }
 }
-
-
