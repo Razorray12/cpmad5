@@ -16,6 +16,24 @@ class H4Page extends StatefulWidget {
 
 class _H4PageState extends State<H4Page> {
   final _formKey = GlobalKey<ConsultationEditFormState>();
+  bool _isSubmitting = false;
+
+  Future<void> _submitAndNavigate() async {
+    if (_isSubmitting) return;
+    
+    setState(() => _isSubmitting = true);
+    
+    try {
+      final success = await _formKey.currentState?.submit() ?? false;
+      if (success && mounted) {
+        context.go(AppRoutes.h5);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,21 +84,20 @@ class _H4PageState extends State<H4Page> {
     return HorizontalStepPage(
       title: 'Госпитализация: Первичная консультация',
       nextRoute: AppRoutes.h5,
-      nextLabel: 'К итогу госпитализации',
-      onNext: () {
-        _formKey.currentState?.submit();
-        context.go(AppRoutes.h5);
-      },
+      nextLabel: _isSubmitting ? 'Сохранение...' : 'К итогу госпитализации',
+      onNext: _submitAndNavigate,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ConsultationEditForm(
           key: _formKey,
           consultation: draft,
-          onSubmit: (updated) {
-            app.addConsultation(updated);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Консультация сохранена')),
-            );
+          onSubmit: (updated) async {
+            await app.addConsultation(updated);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Консультация сохранена')),
+              );
+            }
           },
         ),
       ),

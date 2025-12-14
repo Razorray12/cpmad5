@@ -4,7 +4,7 @@ import '../../../shared/widgets/form_fields.dart';
 
 /// Форма для добавления/редактирования пациента
 class PatientForm extends StatefulWidget {
-  final Function({
+  final Future<void> Function({
     required String firstName,
     required String lastName,
     String? middleName,
@@ -68,9 +68,10 @@ class PatientFormState extends State<PatientForm> {
     super.dispose();
   }
 
-  void submit() {
+  /// Отправить форму и дождаться сохранения данных.
+  Future<bool> submit() async {
     if (_formKey.currentState?.validate() ?? false) {
-      widget.onSubmit(
+      await widget.onSubmit(
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         middleName: _middleNameController.text.trim().isEmpty ? null : _middleNameController.text.trim(),
@@ -87,7 +88,9 @@ class PatientFormState extends State<PatientForm> {
         status: _status,
         imageUrl: _imageUrlController.text.trim().isEmpty ? null : _imageUrlController.text.trim(),
       );
+      return true;
     }
+    return false;
   }
 
   @override

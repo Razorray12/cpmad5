@@ -15,6 +15,24 @@ class H2Page extends StatefulWidget {
 
 class _H2PageState extends State<H2Page> {
   final _formKey = GlobalKey<PatientFormState>();
+  bool _isSubmitting = false;
+
+  Future<void> _submitAndNavigate() async {
+    if (_isSubmitting) return;
+    
+    setState(() => _isSubmitting = true);
+    
+    try {
+      final success = await _formKey.currentState?.submit() ?? false;
+      if (success && mounted) {
+        context.go(AppRoutes.h3);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,57 +41,54 @@ class _H2PageState extends State<H2Page> {
     return HorizontalStepPage(
       title: 'Госпитализация: Регистрация пациента',
       nextRoute: AppRoutes.h3,
-      nextLabel: 'К первичным показателям',
-      onNext: () async {
-        _formKey.currentState?.submit();
-        // Навигация вперёд
-        context.go(AppRoutes.h3);
-      },
+      nextLabel: _isSubmitting ? 'Сохранение...' : 'К первичным показателям',
+      onNext: _submitAndNavigate,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: PatientForm(
           key: _formKey,
-          onSubmit:
-              ({
-                required String firstName,
-                required String lastName,
-                String? middleName,
-                String? birthDate,
-                String? phoneNumber,
-                required String diagnosis,
-                String? room,
-                String? sex,
-                String? admissionDate,
-                String? medications,
-                String? allergies,
-                String? mainDoctor,
-                String? mainDoctorID,
-                required String status,
-                String? imageUrl,
-              }) async {
-                final patientStatus = PatientStatus.fromString(status);
-                final created = await app.addPatient(
-                  firstName: firstName,
-                  lastName: lastName,
-                  middleName: middleName,
-                  birthDate: birthDate,
-                  phoneNumber: phoneNumber,
-                  diagnosis: diagnosis,
-                  room: room,
-                  sex: sex,
-                  admissionDate: admissionDate,
-                  medications: medications,
-                  allergies: allergies,
-                  mainDoctor: mainDoctor,
-                  mainDoctorID: mainDoctorID,
-                  status: patientStatus,
-                  imageUrl: imageUrl,
-                );
-                app.setAdmissionPatientId(created.id);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Пациент добавлен')),
-                );
-              },
+          onSubmit: ({
+            required String firstName,
+            required String lastName,
+            String? middleName,
+            String? birthDate,
+            String? phoneNumber,
+            required String diagnosis,
+            String? room,
+            String? sex,
+            String? admissionDate,
+            String? medications,
+            String? allergies,
+            String? mainDoctor,
+            String? mainDoctorID,
+            required String status,
+            String? imageUrl,
+          }) async {
+            final patientStatus = PatientStatus.fromString(status);
+            final created = await app.addPatient(
+              firstName: firstName,
+              lastName: lastName,
+              middleName: middleName,
+              birthDate: birthDate,
+              phoneNumber: phoneNumber,
+              diagnosis: diagnosis,
+              room: room,
+              sex: sex,
+              admissionDate: admissionDate,
+              medications: medications,
+              allergies: allergies,
+              mainDoctor: mainDoctor,
+              mainDoctorID: mainDoctorID,
+              status: patientStatus,
+              imageUrl: imageUrl,
+            );
+            app.setAdmissionPatientId(created.id);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Пациент добавлен')),
+              );
+            }
+          },
         ),
       ),
     );

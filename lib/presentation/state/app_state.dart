@@ -138,7 +138,6 @@ abstract class _AppState with Store {
       consultations.clear();
       consultations.addAll(loadedConsultations);
 
-      // Загружаем vitals для каждого пациента
       for (final patient in loadedPatients) {
         final vitals = await getVitalsUseCase.execute(patient.id);
         vitalsByPatient[patient.id] = ObservableList.of(vitals);

@@ -199,12 +199,16 @@ class _ConsultationsScreenState extends State<ConsultationsScreen> {
         child: ConsultationEditForm(
           key: formKey,
           consultation: consultation,
-          onSubmit: (updatedConsultation) {
-            AppScope.of(context).updateConsultation(updatedConsultation);
-            Navigator.pop(ctx);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Консультация обновлена')),
-            );
+          onSubmit: (updatedConsultation) async {
+            await AppScope.of(context).updateConsultation(updatedConsultation);
+            if (ctx.mounted) {
+              Navigator.pop(ctx);
+            }
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Консультация обновлена')),
+              );
+            }
           },
         ),
       ),

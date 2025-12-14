@@ -151,32 +151,17 @@ class DashboardScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () => context.push(AppRoutes.v5),
-                            icon: const Icon(Icons.chat),
-                            label: const Text('Чат'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => context.push(AppRoutes.v5),
+                        icon: const Icon(Icons.chat),
+                        label: const Text('Чат'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
                         ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () => context.push(AppRoutes.h1),
-                            icon: const Icon(Icons.person_add),
-                            label: const Text('Госпитализация'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

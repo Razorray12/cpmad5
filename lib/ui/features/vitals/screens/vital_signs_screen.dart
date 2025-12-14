@@ -115,7 +115,7 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
             required String bloodPressure,
             required String oxygenSaturation,
             String? bloodGlucose,
-          }) {
+          }) async {
             final vital = VitalSign(
               patientId: patientId,
               timestamp: DateTime.now(),
@@ -126,11 +126,15 @@ class _VitalSignsScreenState extends State<VitalSignsScreen> {
               oxygenSaturation: int.tryParse(oxygenSaturation) ?? 98,
               bloodGlucose: bloodGlucose != null ? double.tryParse(bloodGlucose) : null,
             );
-            AppScope.of(context).addVital(patientId, vital);
-            Navigator.pop(ctx);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Показатели сохранены')),
-            );
+            await AppScope.of(context).addVital(patientId, vital);
+            if (ctx.mounted) {
+              Navigator.pop(ctx);
+            }
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Показатели сохранены')),
+              );
+            }
           },
         ),
       ),

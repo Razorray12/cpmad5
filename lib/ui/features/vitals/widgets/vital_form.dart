@@ -4,7 +4,7 @@ import '../../../shared/widgets/form_fields.dart';
 
 /// Форма для добавления жизненных показателей
 class VitalForm extends StatefulWidget {
-  final Function({
+  final Future<void> Function({
     required String temperature,
     required String heartRate,
     required String respiratoryRate,
@@ -42,17 +42,22 @@ class VitalFormState extends State<VitalForm> {
     super.dispose();
   }
 
-  void submit() {
+  /// Отправить форму и дождаться сохранения данных.
+  Future<bool> submit() async {
     if (_formKey.currentState?.validate() ?? false) {
-      widget.onSubmit(
+      await widget.onSubmit(
         temperature: _temperatureController.text.trim(),
         heartRate: _heartRateController.text.trim(),
         respiratoryRate: _respiratoryRateController.text.trim(),
         bloodPressure: _bloodPressureController.text.trim(),
         oxygenSaturation: _oxygenSaturationController.text.trim(),
-        bloodGlucose: _bloodGlucoseController.text.trim().isEmpty ? null : _bloodGlucoseController.text.trim(),
+        bloodGlucose: _bloodGlucoseController.text.trim().isEmpty 
+            ? null 
+            : _bloodGlucoseController.text.trim(),
       );
+      return true;
     }
+    return false;
   }
 
   @override

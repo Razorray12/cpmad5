@@ -1,5 +1,7 @@
 import 'dart:async';
 import '../../../core/models/patient.dart' as models;
+import '../../../core/models/vital_sign.dart' as vital_models;
+import '../../../core/models/consultation.dart' as consultation_models;
 import '../../database/app_database.dart';
 import 'package:drift/drift.dart';
 
@@ -67,6 +69,8 @@ class DriftDataSource {
     );
     
     final id = await _database.insertPatient(companion);
+    // ignore: avoid_print
+    print('DriftDataSource: Patient saved with id=$id');
     return patient.copyWith(id: id);
   }
 
@@ -163,6 +167,195 @@ class DriftDataSource {
       mainDoctorID: dbPatient.mainDoctorId,
       status: models.PatientStatus.fromString(dbPatient.status),
       imageUrl: dbPatient.imageUrl,
+    );
+  }
+
+  // ============================================
+  // ПОКАЗАТЕЛИ ЖИЗНЕДЕЯТЕЛЬНОСТИ - CRUD
+  // ============================================
+
+  /// Получить все показатели для пациента.
+  Future<List<vital_models.VitalSign>> getVitalsForPatient(int patientId) async {
+    final dbVitals = await _database.getVitalsForPatient(patientId);
+    return dbVitals.map(_mapToModelVitalSign).toList();
+  }
+
+  /// Получить последние показатели пациента.
+  Future<vital_models.VitalSign?> getLatestVitals(int patientId) async {
+    final dbVital = await _database.getLatestVitals(patientId);
+    if (dbVital == null) return null;
+    return _mapToModelVitalSign(dbVital);
+  }
+
+  /// Добавить показатели.
+  Future<vital_models.VitalSign> addVitalSign(vital_models.VitalSign vitalSign) async {
+    final companion = VitalSignsCompanion.insert(
+      patientId: vitalSign.patientId,
+      timestamp: vitalSign.timestamp,
+      temperature: vitalSign.temperature,
+      heartRate: vitalSign.heartRate,
+      respiratoryRate: vitalSign.respiratoryRate,
+      bloodPressure: vitalSign.bloodPressure.toString(),
+      oxygenSaturation: vitalSign.oxygenSaturation,
+      bloodGlucose: Value(vitalSign.bloodGlucose),
+      createdAt: DateTime.now(),
+    );
+    
+    final id = await _database.insertVitalSign(companion);
+    // ignore: avoid_print
+    print('DriftDataSource: VitalSign saved with id=$id for patient=${vitalSign.patientId}');
+    return vitalSign.copyWith(id: id);
+  }
+
+  /// Удалить показатели.
+  Future<void> deleteVitalSign(int id) async {
+    await _database.deleteVitalSign(id);
+  }
+
+  /// Удалить все показатели пациента.
+  Future<void> deleteVitalsForPatient(int patientId) async {
+    await _database.deleteVitalsForPatient(patientId);
+  }
+
+  /// Получить показатели за период.
+  Future<List<vital_models.VitalSign>> getVitalsForPeriod(
+    int patientId,
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final dbVitals = await _database.getVitalsForPeriod(patientId, startDate, endDate);
+    return dbVitals.map(_mapToModelVitalSign).toList();
+  }
+
+  /// Стрим показателей пациента.
+  Stream<List<vital_models.VitalSign>> watchVitalsForPatient(int patientId) {
+    return _database.watchVitalsForPatient(patientId).map(
+      (list) => list.map(_mapToModelVitalSign).toList(),
+    );
+  }
+
+  /// Маппинг из DB модели в бизнес-модель VitalSign.
+  vital_models.VitalSign _mapToModelVitalSign(VitalSign dbVital) {
+    return vital_models.VitalSign(
+      id: dbVital.id,
+      patientId: dbVital.patientId,
+      timestamp: dbVital.timestamp,
+      temperature: dbVital.temperature,
+      heartRate: dbVital.heartRate,
+      respiratoryRate: dbVital.respiratoryRate,
+      bloodPressure: vital_models.BloodPressure.fromString(dbVital.bloodPressure),
+      oxygenSaturation: dbVital.oxygenSaturation,
+      bloodGlucose: dbVital.bloodGlucose,
+    );
+  }
+
+  // ============================================
+  // КОНСУЛЬТАЦИИ - CRUD
+  // ============================================
+
+  /// Получить все консультации.
+  Future<List<consultation_models.Consultation>> getAllConsultations() async {
+    final dbConsultations = await _database.getAllConsultations();
+    return dbConsultations.map(_mapToModelConsultation).toList();
+  }
+
+  /// Получить консультации пациента.
+  Future<List<consultation_models.Consultation>> getConsultationsForPatient(int patientId) async {
+    final dbConsultations = await _database.getConsultationsForPatient(patientId);
+    return dbConsultations.map(_mapToModelConsultation).toList();
+  }
+
+  /// Получить консультацию по ID.
+  Future<consultation_models.Consultation?> getConsultationById(int id) async {
+    final dbConsultation = await _database.getConsultationById(id);
+    if (dbConsultation == null) return null;
+    return _mapToModelConsultation(dbConsultation);
+  }
+
+  /// Добавить консультацию.
+  Future<consultation_models.Consultation> addConsultation(consultation_models.Consultation consultation) async {
+    final now = DateTime.now();
+    final companion = ConsultationsCompanion.insert(
+      patientId: consultation.patientId,
+      scheduledAt: consultation.dateTime,
+      doctorId: Value(consultation.doctorId),
+      doctorName: Value(consultation.doctorName),
+      note: consultation.note,
+      type: consultation.type.name,
+      createdAt: now,
+      updatedAt: now,
+    );
+    
+    final id = await _database.insertConsultation(companion);
+    // ignore: avoid_print
+    print('DriftDataSource: Consultation saved with id=$id for patient=${consultation.patientId}');
+    return consultation.copyWith(id: id);
+  }
+
+  /// Обновить консультацию.
+  Future<consultation_models.Consultation> updateConsultation(consultation_models.Consultation consultation) async {
+    final companion = ConsultationsCompanion(
+      scheduledAt: Value(consultation.dateTime),
+      doctorId: Value(consultation.doctorId),
+      doctorName: Value(consultation.doctorName),
+      note: Value(consultation.note),
+      type: Value(consultation.type.name),
+      updatedAt: Value(DateTime.now()),
+    );
+    
+    await _database.updateConsultationById(consultation.id!, companion);
+    return consultation;
+  }
+
+  /// Удалить консультацию.
+  Future<void> deleteConsultation(int id) async {
+    await _database.deleteConsultation(id);
+  }
+
+  /// Удалить консультации пациента.
+  Future<void> deleteConsultationsForPatient(int patientId) async {
+    await _database.deleteConsultationsForPatient(patientId);
+  }
+
+  /// Получить консультации на сегодня.
+  Future<List<consultation_models.Consultation>> getTodayConsultations() async {
+    final dbConsultations = await _database.getTodayConsultations();
+    return dbConsultations.map(_mapToModelConsultation).toList();
+  }
+
+  /// Получить консультации за период.
+  Future<List<consultation_models.Consultation>> getConsultationsForPeriod(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    final dbConsultations = await _database.getConsultationsForPeriod(startDate, endDate);
+    return dbConsultations.map(_mapToModelConsultation).toList();
+  }
+
+  /// Стрим всех консультаций.
+  Stream<List<consultation_models.Consultation>> watchAllConsultations() {
+    return _database.watchAllConsultations().map(
+      (list) => list.map(_mapToModelConsultation).toList(),
+    );
+  }
+
+  /// Стрим консультаций пациента.
+  Stream<List<consultation_models.Consultation>> watchConsultationsForPatient(int patientId) {
+    return _database.watchConsultationsForPatient(patientId).map(
+      (list) => list.map(_mapToModelConsultation).toList(),
+    );
+  }
+
+  /// Маппинг из DB модели в бизнес-модель Consultation.
+  consultation_models.Consultation _mapToModelConsultation(Consultation dbConsultation) {
+    return consultation_models.Consultation(
+      id: dbConsultation.id,
+      patientId: dbConsultation.patientId,
+      dateTime: dbConsultation.scheduledAt,
+      doctorId: dbConsultation.doctorId,
+      doctorName: dbConsultation.doctorName,
+      note: dbConsultation.note,
+      type: consultation_models.ConsultationType.fromString(dbConsultation.type),
     );
   }
 }

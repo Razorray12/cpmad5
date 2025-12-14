@@ -2,9 +2,6 @@ import 'package:get_it/get_it.dart';
 import 'package:dio/dio.dart';
 
 // Data Sources - Local
-import '../../../data/datasources/local/local_patient_datasource.dart';
-import '../../../data/datasources/local/local_vital_datasource.dart';
-import '../../../data/datasources/local/local_consultation_datasource.dart';
 import '../../../data/datasources/local/local_auth_datasource.dart';
 import '../../../data/datasources/local/local_chat_datasource.dart';
 import '../../../data/datasources/local/shared_prefs_datasource.dart';
@@ -51,6 +48,9 @@ import '../../../presentation/state/theme_state.dart';
 import '../../features/auth/state/auth_state.dart';
 import '../../features/medical/state/medical_state.dart';
 
+// Models for sample data
+import '../../../core/models/patient.dart';
+
 final GetIt getIt = GetIt.instance;
 
 /// Настройка Dependency Injection.
@@ -76,7 +76,7 @@ Future<void> setupLocator() async {
     );
   }
   
-  // Drift (SQLite) для хранения данных пациентов
+  // Drift (SQLite/IndexedDB) для хранения данных пациентов, показателей, консультаций
   if (!getIt.isRegistered<DriftDataSource>()) {
     final driftDataSource = DriftDataSource();
     await driftDataSource.init();
@@ -88,24 +88,6 @@ Future<void> setupLocator() async {
   // ============================================
   // DATA SOURCES (Singleton)
   // ============================================
-  
-  if (!getIt.isRegistered<LocalPatientDataSource>()) {
-    getIt.registerLazySingleton<LocalPatientDataSource>(
-      () => LocalPatientDataSource(),
-    );
-  }
-  
-  if (!getIt.isRegistered<LocalVitalDataSource>()) {
-    getIt.registerLazySingleton<LocalVitalDataSource>(
-      () => LocalVitalDataSource(),
-    );
-  }
-  
-  if (!getIt.isRegistered<LocalConsultationDataSource>()) {
-    getIt.registerLazySingleton<LocalConsultationDataSource>(
-      () => LocalConsultationDataSource(),
-    );
-  }
   
   // LocalAuthDataSource использует SecureStorageDataSource
   if (!getIt.isRegistered<LocalAuthDataSource>()) {
@@ -188,21 +170,22 @@ Future<void> setupLocator() async {
   // REPOSITORIES (Singleton)
   // ============================================
   
+  // Все репозитории используют DriftDataSource для локального хранения
   if (!getIt.isRegistered<PatientRepository>()) {
     getIt.registerLazySingleton<PatientRepository>(
-      () => PatientRepositoryImpl(getIt<LocalPatientDataSource>()),
+      () => PatientRepositoryImpl(getIt<DriftDataSource>()),
     );
   }
   
   if (!getIt.isRegistered<VitalRepository>()) {
     getIt.registerLazySingleton<VitalRepository>(
-      () => VitalRepositoryImpl(getIt<LocalVitalDataSource>()),
+      () => VitalRepositoryImpl(getIt<DriftDataSource>()),
     );
   }
   
   if (!getIt.isRegistered<ConsultationRepository>()) {
     getIt.registerLazySingleton<ConsultationRepository>(
-      () => ConsultationRepositoryImpl(getIt<LocalConsultationDataSource>()),
+      () => ConsultationRepositoryImpl(getIt<DriftDataSource>()),
     );
   }
   
@@ -472,12 +455,120 @@ Future<void> setupLocator() async {
   }
 
   // ============================================
-  // INITIALIZE SAMPLE DATA
+  // INITIALIZE SAMPLE DATA IN DRIFT
   // ============================================
   
-  // Инициализируем тестовые данные
-  await getIt<LocalPatientDataSource>().initializeSampleData();
+  // Проверяем, есть ли уже данные в базе
+  final driftDataSource = getIt<DriftDataSource>();
+  final existingPatients = await driftDataSource.getAllPatients();
+  
+  if (existingPatients.isEmpty) {
+    // Инициализируем тестовые данные только если база пустая
+    // ignore: avoid_print
+    print('setupLocator: Initializing sample data...');
+    await _initializeSampleData(driftDataSource);
+  }
   
   // Загружаем данные в состояние
   await getIt<AppState>().loadData();
+}
+
+/// Инициализация тестовых данных в Drift базе данных.
+Future<void> _initializeSampleData(DriftDataSource dataSource) async {
+  final samplePatients = [
+    Patient(
+      id: 0,
+      firstName: 'Анна',
+      lastName: 'Петрова',
+      middleName: 'Сергеевна',
+      birthDate: '1985-03-15',
+      phoneNumber: '+7-912-345-67-89',
+      diagnosis: 'Гипертоническая болезнь II степени',
+      room: '101',
+      sex: 'Женский',
+      admissionDate: '2024-01-15',
+      medications: 'Эналаприл 5мг, Амлодипин 5мг',
+      allergies: 'Пенициллин',
+      mainDoctor: 'Иванов И.И.',
+      mainDoctorID: 'DOC001',
+      status: PatientStatus.stable,
+      imageUrl: 'https://randomuser.me/api/portraits/men/30.jpg',
+    ),
+    Patient(
+      id: 0,
+      firstName: 'Михаил',
+      lastName: 'Сидоров',
+      middleName: 'Александрович',
+      birthDate: '1978-07-22',
+      phoneNumber: '+7-923-456-78-90',
+      diagnosis: 'Сахарный диабет 2 типа',
+      room: '205',
+      sex: 'Мужской',
+      admissionDate: '2024-01-20',
+      medications: 'Метформин 1000мг, Глибенкламид 5мг',
+      allergies: 'Сульфаниламиды',
+      mainDoctor: 'Петрова А.А.',
+      mainDoctorID: 'DOC002',
+      status: PatientStatus.observation,
+      imageUrl: 'https://randomuser.me/api/portraits/women/51.jpg',
+    ),
+    Patient(
+      id: 0,
+      firstName: 'Елена',
+      lastName: 'Козлова',
+      middleName: 'Владимировна',
+      birthDate: '1992-11-08',
+      phoneNumber: '+7-934-567-89-01',
+      diagnosis: 'Бронхиальная астма',
+      room: '312',
+      sex: 'Женский',
+      admissionDate: '2024-01-25',
+      medications: 'Сальбутамол, Беклометазон',
+      allergies: 'Пыльца растений',
+      mainDoctor: 'Смирнов В.В.',
+      mainDoctorID: 'DOC003',
+      status: PatientStatus.observation,
+      imageUrl: 'https://randomuser.me/api/portraits/women/92.jpg',
+    ),
+    Patient(
+      id: 0,
+      firstName: 'Дмитрий',
+      lastName: 'Морозов',
+      middleName: 'Игоревич',
+      birthDate: '1980-05-14',
+      phoneNumber: '+7-945-678-90-12',
+      diagnosis: 'Ишемическая болезнь сердца',
+      room: '108',
+      sex: 'Мужской',
+      admissionDate: '2024-01-28',
+      medications: 'Аспирин 75мг, Аторвастатин 20мг',
+      allergies: 'Нет',
+      mainDoctor: 'Кузнецова Н.Н.',
+      mainDoctorID: 'DOC004',
+      status: PatientStatus.stable,
+      imageUrl: 'https://randomuser.me/api/portraits/men/57.jpg',
+    ),
+    Patient(
+      id: 0,
+      firstName: 'Ольга',
+      lastName: 'Новикова',
+      middleName: 'Петровна',
+      birthDate: '1975-12-03',
+      phoneNumber: '+7-956-789-01-23',
+      diagnosis: 'Хронический гастрит',
+      room: '401',
+      sex: 'Женский',
+      admissionDate: '2024-02-01',
+      medications: 'Омепразол 20мг, Домперидон 10мг',
+      allergies: 'Лактоза',
+      mainDoctor: 'Волкова С.С.',
+      mainDoctorID: 'DOC005',
+      status: PatientStatus.observation,
+      imageUrl: 'https://randomuser.me/api/portraits/women/77.jpg',
+    ),
+  ];
+
+  for (final patient in samplePatients) {
+    await dataSource.addPatient(patient);
+  }
 }

@@ -6,7 +6,7 @@ import '../../../shared/widgets/date_format.dart';
 /// Форма для редактирования консультации
 class ConsultationEditForm extends StatefulWidget {
   final Consultation consultation;
-  final Function(Consultation updatedConsultation) onSubmit;
+  final Future<void> Function(Consultation updatedConsultation) onSubmit;
 
   const ConsultationEditForm({
     super.key,
@@ -47,7 +47,8 @@ class ConsultationEditFormState extends State<ConsultationEditForm> {
     super.dispose();
   }
 
-  void submit() {
+  /// Отправить форму и дождаться сохранения данных.
+  Future<bool> submit() async {
     if (_formKey.currentState?.validate() ?? false) {
       final updatedConsultation = Consultation(
         id: widget.consultation.id,
@@ -56,8 +57,10 @@ class ConsultationEditFormState extends State<ConsultationEditForm> {
         doctorName: _doctorController.text.trim().isEmpty ? null : _doctorController.text.trim(),
         note: _noteController.text.trim(),
       );
-      widget.onSubmit(updatedConsultation);
+      await widget.onSubmit(updatedConsultation);
+      return true;
     }
+    return false;
   }
 
   @override

@@ -1,46 +1,46 @@
 import '../../core/models/consultation.dart';
 import '../../domain/repositories/consultation_repository.dart';
-import '../datasources/local/local_consultation_datasource.dart';
+import '../datasources/local/drift_datasource.dart';
 
 /// Реализация репозитория консультаций.
 class ConsultationRepositoryImpl implements ConsultationRepository {
-  final LocalConsultationDataSource _localDataSource;
+  final DriftDataSource _driftDataSource;
 
-  ConsultationRepositoryImpl(this._localDataSource);
+  ConsultationRepositoryImpl(this._driftDataSource);
 
   @override
   Future<List<Consultation>> getAllConsultations() {
-    return _localDataSource.getAll();
+    return _driftDataSource.getAllConsultations();
   }
 
   @override
   Future<List<Consultation>> getConsultationsForPatient(int patientId) {
-    return _localDataSource.getForPatient(patientId);
+    return _driftDataSource.getConsultationsForPatient(patientId);
   }
 
   @override
   Future<Consultation?> getConsultationById(int id) {
-    return _localDataSource.getById(id);
+    return _driftDataSource.getConsultationById(id);
   }
 
   @override
   Future<Consultation> addConsultation(Consultation consultation) {
-    return _localDataSource.add(consultation);
+    return _driftDataSource.addConsultation(consultation);
   }
 
   @override
   Future<Consultation> updateConsultation(Consultation consultation) {
-    return _localDataSource.update(consultation);
+    return _driftDataSource.updateConsultation(consultation);
   }
 
   @override
   Future<void> deleteConsultation(int id) {
-    return _localDataSource.delete(id);
+    return _driftDataSource.deleteConsultation(id);
   }
 
   @override
   Future<void> deleteAllConsultationsForPatient(int patientId) {
-    return _localDataSource.deleteAllForPatient(patientId);
+    return _driftDataSource.deleteConsultationsForPatient(patientId);
   }
 
   @override
@@ -48,22 +48,21 @@ class ConsultationRepositoryImpl implements ConsultationRepository {
     DateTime startDate,
     DateTime endDate,
   ) {
-    return _localDataSource.getForPeriod(startDate, endDate);
+    return _driftDataSource.getConsultationsForPeriod(startDate, endDate);
   }
 
   @override
   Future<List<Consultation>> getTodayConsultations() {
-    return _localDataSource.getTodayConsultations();
+    return _driftDataSource.getTodayConsultations();
   }
 
   @override
   Stream<List<Consultation>> watchConsultations() {
-    return _localDataSource.consultationsStream;
+    return _driftDataSource.watchAllConsultations();
   }
 
   @override
   Stream<List<Consultation>> watchConsultationsForPatient(int patientId) {
-    return _localDataSource.watchForPatient(patientId);
+    return _driftDataSource.watchConsultationsForPatient(patientId);
   }
 }
-
